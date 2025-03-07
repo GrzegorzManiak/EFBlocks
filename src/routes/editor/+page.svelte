@@ -3,14 +3,18 @@
     import * as Blocks from "../../blocks";
     import Konva from "konva";
 
+    import VariableDrawer from './drawer.svelte';
+    import {VariableStore} from "../../blocks/executer/variable";
+
+    const variableStore = new VariableStore();
     const debug = true;
 
-    let variableDrawerOpen = false;
+    let variableDrawerOpen = $state(false);
     let variableData: {
         segment: Blocks.Types.SegmentDefinition,
         block: Blocks.Block,
         input:  Blocks.Types.CreatedInput,
-    } | null;
+    } | null = $state(null);
 
 
     const callbacks: Blocks.CallbackDict = {
@@ -49,5 +53,15 @@
     });
 </script>
 
-<div id="container" style="height: 100vh; width: 100vw;" bind:this={editorElement}>
+<div class="absolute top-0 left-0 z-10">
+    <VariableDrawer
+            {variableStore}
+            bind:variableData
+            bind:variableDrawerOpen />
+</div>
+
+<div
+        id="container"
+        class="w-screen h-screen bg-white"
+        bind:this={editorElement}>
 </div>

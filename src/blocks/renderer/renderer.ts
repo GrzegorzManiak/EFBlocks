@@ -67,6 +67,7 @@ function renderBlock(id: string, data: Types.BlockDefinition, modifier: Types.Re
 				text: inputText,
 				mainBody: inputShape,
 				occupied: false,
+				isConstant: false,
 				originalColor: inputShape.fill().toString()
 			})
 		}

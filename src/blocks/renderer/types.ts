@@ -52,6 +52,7 @@ type CreatedInput = {
 	text: Konva.Text;
 	occupied: boolean;
 	originalColor: string;
+	isConstant: boolean;
 } & Input;
 
 type SegmentDefinition = {

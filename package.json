@@ -17,6 +17,7 @@
 		"@sveltejs/vite-plugin-svelte": "^5.0.0",
 		"autoprefixer": "^10.4.20",
 		"bits-ui": "0.22.0",
+		"lucide-svelte": "^0.479.0",
 		"svelte": "^5.0.0",
 		"svelte-check": "^4.0.0",
 		"tailwindcss": "^3.4.17",
@@ -30,6 +31,8 @@
 		"i": "^0.3.7",
 		"js-beautify": "^1.15.4",
 		"konva": "^9.3.18",
-		"svelte-konva": "^0.3.1"
+		"svelte-konva": "^0.3.1",
+		"tailwind-merge": "^3.0.2",
+		"tailwind-variants": "^0.3.1"
 	}
 }

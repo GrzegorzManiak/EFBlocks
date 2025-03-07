@@ -139,6 +139,55 @@ class Block {
 		});
 	}
 
+	public updateInput(input: CreatedInput, data: {
+		displayText?: string;
+		key?: string;
+		occupied?: boolean;
+		isConstant?: boolean;
+	}) {
+		data = {
+			displayText: data.displayText ?? input.name,
+			key: data.key ?? input.key,
+			occupied: data.occupied ?? input.occupied,
+			isConstant: data.isConstant ?? input.isConstant
+		}
+
+		if (data.isConstant !== input.isConstant && data.isConstant !== undefined) {
+			input.isConstant = data.isConstant;
+		}
+
+		if (data.displayText !== input.name && data.displayText) {
+			input.text.text(data.displayText);
+			const textWidth = input.text.width();
+			const mainBodyWidth = input.mainBody.width();
+			input.text.x((mainBodyWidth - textWidth) / 2);
+		}
+
+		if (data.key !== input.key) {
+			input.key = data.key;
+		}
+
+		data.occupied = data.occupied ?? false;
+		if (data.occupied !== input.occupied) {
+			input.occupied = data.occupied;
+			if (data.occupied) {
+				input.mainBody.fill('rgba(255,255,255,0.5)');
+			} else {
+				input.mainBody.fill(input.originalColor);
+			}
+		}
+	}
+
+	public resetInput(input: CreatedInput) {
+		input.occupied = false;
+		input.mainBody.fill(input.originalColor);
+		input.text.text(input.name);
+		const textWidth = input.text.width();
+		const mainBodyWidth = input.mainBody.width();
+		input.text.x((mainBodyWidth - textWidth) / 2);
+		input.key = undefined;
+	}
+
 	public addEventListeners() {
 		let lastDrag = 0;
 		const dragRate = 100;
