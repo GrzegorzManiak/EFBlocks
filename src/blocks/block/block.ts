@@ -3,7 +3,7 @@ import Konva from "konva";
 import {type CreatedInput, type Input, type InputData, type SegmentAuxMap, type SegmentDefinition} from "../renderer/types";
 import {getDistanceBetween} from "./helpers";
 import SnapPointRecord from "./spr";
-import {generateJs} from "./generator";
+import type { CallbackDict } from "./helpers";
 
 let activeId: string | undefined = undefined;
 
@@ -30,6 +30,8 @@ IndicatorLine.hide();
 
 class Block {
 	public readonly id: string = Math.random().toString(36).substr(2, 9);
+
+
 	public isDynamic: boolean = false;
 	public group: Konva.Group;
 	public height: number;
@@ -49,7 +51,8 @@ class Block {
 
 	public constructor(
 		public blockDefinition: Renderer.Types.BlockDefinition,
-		private layer: Konva.Layer
+		private layer: Konva.Layer,
+		public callbacks: CallbackDict
 	) {
 		const [group, block, snapPoints, height, texts, variables] = Renderer.renderBlock(this.id, blockDefinition, {
 			extraWidth: 0,
@@ -117,18 +120,22 @@ class Block {
 
 	public addVariableClick(variable: CreatedInput, segmentId: string): void {
 		variable.group.on('click', () => {
-			console.log('Variable clicked', variable, segmentId);
-			if (variable.occupied) {
-				variable.occupied = false;
-				variable.mainBody.fill(variable.originalColor);
-				variable.text.text(variable.name);
-			}
+			const segment = this.segments.get(segmentId);
+			if (!segment) return;
 
-			else {
-				variable.occupied = true;
-				variable.mainBody.fill('rgba(255,255,255,0.71)');
-				variable.text.text('Occupied');
-			}
+			this.callbacks.variableClick(this, segment, variable);
+
+			// if (variable.occupied) {
+			// 	variable.occupied = false;
+			// 	variable.mainBody.fill(variable.originalColor);
+			// 	variable.text.text(variable.name);
+			// }
+			//
+			// else {
+			// 	variable.occupied = true;
+			// 	variable.mainBody.fill('rgba(255,255,255,0.71)');
+			// 	variable.text.text('Occupied');
+			// }
 		});
 	}
 
