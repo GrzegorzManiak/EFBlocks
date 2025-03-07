@@ -1,9 +1,10 @@
 import * as Renderer from "../renderer";
 import Konva from "konva";
-import {type CreatedInput, type Input, type InputData, type SegmentAuxMap, type SegmentDefinition} from "../renderer/types";
+import {type Input, type InputData, type SegmentAuxMap, type SegmentDefinition} from "../renderer/types";
 import {getDistanceBetween} from "./helpers";
 import SnapPointRecord from "./spr";
 import type { CallbackDict } from "./helpers";
+import type {CreatedInput} from "../renderer/inputs";
 
 let activeId: string | undefined = undefined;
 
@@ -156,7 +157,7 @@ class Block {
 			input.isConstant = data.isConstant;
 		}
 
-		if (data.displayText !== input.name && data.displayText) {
+		if (data.displayText) {
 			input.text.text(data.displayText);
 			const textWidth = input.text.width();
 			const mainBodyWidth = input.mainBody.width();

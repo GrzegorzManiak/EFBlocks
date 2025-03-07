@@ -1,4 +1,5 @@
 import Konva from "konva";
+import type {CreatedInput} from "./inputs";
 
 type InputData = {
 	text?: Konva.Text;
@@ -45,15 +46,6 @@ type Input = {
 	mode: InputMode;
 	key?: string;
 }
-
-type CreatedInput = {
-	group: Konva.Group;
-	mainBody: Konva.Shape;
-	text: Konva.Text;
-	occupied: boolean;
-	originalColor: string;
-	isConstant: boolean;
-} & Input;
 
 type SegmentDefinition = {
 	id: string;
@@ -139,5 +131,4 @@ export {
 	type RendererModifier,
 	type Input,
 	type InputData,
-	type CreatedInput
 }

@@ -10,10 +10,11 @@
     const debug = true;
 
     let variableDrawerOpen = $state(false);
+    let variableRest = $state((constantText: string, referenceText: string) => {});
     let variableData: {
         segment: Blocks.Types.SegmentDefinition,
         block: Blocks.Block,
-        input:  Blocks.Types.CreatedInput,
+        input: Blocks.Renderer.Inputs.CreatedInput,
     } | null = $state(null);
 
 
@@ -22,6 +23,12 @@
             console.log("Variable clicked", block, segment, input);
             variableData = { block, segment, input };
             variableDrawerOpen = true;
+
+            if (input.isConstant) {
+                variableRest(input.text.text(), "");
+            } else {
+                variableRest("", input.key || "");
+            }
         },
     }
 
@@ -56,6 +63,7 @@
 <div class="absolute top-0 left-0 z-10">
     <VariableDrawer
             {variableStore}
+            bind:variableRest
             bind:variableData
             bind:variableDrawerOpen />
 </div>

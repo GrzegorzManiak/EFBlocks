@@ -2,7 +2,7 @@ import Konva from "konva";
 import * as Types from "./types";
 import * as Helpers from "./helpers";
 import * as Segments from "./segments";
-import {createInput, initialVariableSpacing, variableSpacing} from "./inputs";
+import {CreatedInput, createInput, initialVariableSpacing, variableSpacing} from "./inputs";
 import {blockMinimumWidth} from "./segments";
 
 function renderBlock(id: string, data: Types.BlockDefinition, modifier: Types.RendererModifier): [Konva.Group, Konva.Path, Map<string, Types.SnapPoint>, number, Array<Konva.Text>, Types.SegmentAuxMap] {
@@ -53,7 +53,7 @@ function renderBlock(id: string, data: Types.BlockDefinition, modifier: Types.Re
 
 		const segment = data.segments[i];
 		const inputGroup = new Konva.Group();
-		const inputs: Array<Types.CreatedInput> = [];
+		const inputs: Array<CreatedInput> = [];
 		let currentWidth = 0;
 		for (let j = 0; j < (segment.inputs ?? []).length; j++) {
 			const input = segment.inputs![j];
@@ -61,15 +61,15 @@ function renderBlock(id: string, data: Types.BlockDefinition, modifier: Types.Re
 			if (!group) continue;
 			inputGroup.add(group);
 			currentWidth += width;
-			inputs.push({
-				...input,
+			inputs.push(new CreatedInput(
+				input,
 				group,
-				text: inputText,
-				mainBody: inputShape,
-				occupied: false,
-				isConstant: false,
-				originalColor: inputShape.fill().toString()
-			})
+				inputShape,
+				inputText,
+				false,
+				inputShape.fill().toString(),
+				false
+			));
 		}
 
 		if (modifier.addToGroup) blockGroup.add(inputGroup);

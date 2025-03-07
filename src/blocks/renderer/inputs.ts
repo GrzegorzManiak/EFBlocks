@@ -1,6 +1,7 @@
 import * as Types from "./types";
 import Konva from "konva";
 import {font, headerMinimumHeight} from "./segments";
+import {type Input, InputMode, InputType} from "./types";
 
 const variableMinimumHeight = headerMinimumHeight * 0.85;
 const yPos = (headerMinimumHeight - variableMinimumHeight) / 2;
@@ -109,8 +110,43 @@ function createInput(rendererContext: Types.RendererContext, input: Types.Input,
 	}
 }
 
+class CreatedInput {
+	group: Konva.Group;
+	mainBody: Konva.Shape;
+	text: Konva.Text;
+	occupied: boolean;
+	originalColor: string;
+	isConstant: boolean;
+	id: string;
+	internalName: string;
+	type: InputType;
+	name: string;
+	extraWidth?: number;
+	mode: InputMode;
+	key?: string;
+
+	constructor(input: Input, group: Konva.Group, mainBody: Konva.Shape, text: Konva.Text, occupied: boolean, originalColor: string, isConstant: boolean) {
+		this.id = input.id;
+		this.internalName = input.internalName;
+		this.type = input.type;
+		this.name = input.name;
+		this.extraWidth = input.extraWidth;
+		this.mode = input.mode;
+		this.key = input.key;
+
+		this.group = group;
+		this.mainBody = mainBody;
+		this.text = text;
+		this.occupied = occupied;
+		this.originalColor = originalColor;
+		this.isConstant = isConstant;
+	}
+}
+
+
 export {
 	initialVariableSpacing,
 	variableSpacing,
-	createInput
+	createInput,
+	CreatedInput
 }

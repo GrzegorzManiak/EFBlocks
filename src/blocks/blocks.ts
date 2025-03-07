@@ -255,14 +255,14 @@ const setVariableTo: BlockRenderer.Types.BlockDefinition = {
 					id: randomId(),
 					name: 'Variable',
 					type: InputType.Variable,
-					mode: InputMode.Write
+					mode: InputMode.Read
 				},
 				{
 					internalName: 'to',
 					id: randomId(),
 					name: 'Value',
 					type: InputType.Variable,
-					mode: InputMode.Read
+					mode: InputMode.Write
 				}
 			]
 		}

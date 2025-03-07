@@ -10,15 +10,17 @@
     import type {VariableStore} from "../../blocks/executer/variable";
 
     let {
+        variableRest = $bindable(),
         variableData = $bindable(),
         variableDrawerOpen = $bindable(),
         variableStore,
     } : {
+        variableRest: (constantText: string, referenceText: string) => void,
         variableStore: VariableStore,
         variableData: {
             segment: Blocks.Types.SegmentDefinition,
             block: Blocks.Block,
-            input: Blocks.Types.CreatedInput,
+            input: Blocks.Renderer.Inputs.CreatedInput,
         } | null,
         variableDrawerOpen: boolean
     } = $props();
@@ -26,10 +28,15 @@
     let constantInput: string = $state("");
     let referenceInput: string = $state("");
 
+    function closeDrawer() {
+        variableDrawerOpen = false;
+        constantInput = "";
+        referenceInput = "";
+    }
+
     function saveConstant() {
         console.log("Saving constant", constantInput);
-        variableDrawerOpen = false;
-        if (variableData === null) return;
+        if (variableData === null) return closeDrawer();
 
         if (
             constantInput.trim() === "" ||
@@ -45,38 +52,43 @@
         });
 
         variableStore.set(id, constantInput);
+        closeDrawer();
     }
 
     function saveReference() {
         console.log("Saving reference", referenceInput);
-        variableDrawerOpen = false;
-        if (variableData === null) return;
+        if (variableData === null) return closeDrawer();
 
         if (
             referenceInput.trim() === "" ||
             referenceInput.length < 3
         ) return reset();
 
-        referenceInput = referenceInput.trim();
+        const input = referenceInput.trim();
         const id = referenceInput.trim().toLowerCase();
         variableData.block.updateInput(variableData.input, {
             isConstant: false,
             occupied: true,
-            displayText: referenceInput,
+            displayText: input,
             key: id,
         });
 
-        variableStore.set(id, referenceInput);
+        variableStore.set(id, input);
+        closeDrawer();
     }
 
     function reset() {
-        constantInput = "";
-        referenceInput = "";
-        variableDrawerOpen = false;
+        closeDrawer();
         if (variableData === null) return;
         variableData.block.resetInput(variableData.input);
     }
 
+    function variableResetFunc(constantText: string, referenceText: string) {
+        constantInput = constantText;
+        referenceInput = referenceText;
+    }
+
+    variableRest = variableResetFunc;
 </script>
 
 <div></div>
@@ -85,12 +97,19 @@
     <Dialog.Root bind:open={variableDrawerOpen} >
         <Dialog.Content>
 
-            <Tabs.Root value="account" class="w-full">
+            <Tabs.Root class="w-full" value={
+                variableData.input.mode === Blocks.Renderer.Types.InputMode.Read ?
+                    variableData.input.isConstant === true ? "Constant" : "Reference" : "Reference"
+            }>
                 <Tabs.List class="grid w-full grid-cols-2">
-                    <Tabs.Trigger value="account">Constant</Tabs.Trigger>
-                    <Tabs.Trigger value="password">Reference</Tabs.Trigger>
+                    {#if variableData.input.mode === Blocks.Renderer.Types.InputMode.Read}
+                        <Tabs.Trigger value="Constant">Constant</Tabs.Trigger>
+                        <Tabs.Trigger value="Reference">Reference</Tabs.Trigger>
+                    {:else}
+                        <Tabs.Trigger value="Reference" class="col-span-2">Reference</Tabs.Trigger>
+                    {/if}
                 </Tabs.List>
-                <Tabs.Content value="account" class="border-none p-0 m-0">
+                <Tabs.Content value="Constant" class="border-none p-0 m-0">
                     <Card.Root class="border-none shadow-none p-0 m-0">
                         <Card.Header class="p-0 mt-4">
                             <Card.Title>Constant Variable</Card.Title>
@@ -112,7 +131,7 @@
                     </Card.Root>
                 </Tabs.Content>
 
-                <Tabs.Content value="password">
+                <Tabs.Content value="Reference">
                     <Card.Root class="border-none shadow-none p-0 m-0">
                         <Card.Header class="p-0 mt-4">
                             <Card.Title>Reference Variable</Card.Title>
