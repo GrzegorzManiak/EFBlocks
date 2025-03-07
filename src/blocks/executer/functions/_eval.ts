@@ -1,5 +1,6 @@
 enum EvalOperation {
-    Equals = '=',
+    Equals = '==',
+    Different = '!=',
     LessThan = '<',
     GreaterThan = '>',
     LessThanOrEqual = '<=',
@@ -9,6 +10,7 @@ enum EvalOperation {
 function evalNumber(n1: number, n2: number, opr: EvalOperation): boolean {
     switch (opr) {
         case EvalOperation.Equals: return n1 == n2;
+        case EvalOperation.Different: return n1 != n2;
         case EvalOperation.LessThan: return n1 < n2;
         case EvalOperation.GreaterThan: return n1 > n2;
         case EvalOperation.LessThanOrEqual: return n1 <= n2;
@@ -19,6 +21,7 @@ function evalNumber(n1: number, n2: number, opr: EvalOperation): boolean {
 function evalBoolean(b1: boolean, b2: boolean, opr: EvalOperation): boolean {
     switch (opr) {
         case EvalOperation.Equals: return b1 == b2;
+        case EvalOperation.Different: return b1 != b2;
         case EvalOperation.LessThan: return b1 < b2;
         case EvalOperation.GreaterThan: return b1 > b2;
         case EvalOperation.LessThanOrEqual: return b1 <= b2;
@@ -29,6 +32,7 @@ function evalBoolean(b1: boolean, b2: boolean, opr: EvalOperation): boolean {
 function evalString(s1: string, s2: string, opr: EvalOperation): boolean {
     switch (opr) {
         case EvalOperation.Equals: return s1 == s2;
+        case EvalOperation.Different: return s1 != s2;
         case EvalOperation.LessThan: return s1 < s2;
         case EvalOperation.GreaterThan: return s1 > s2;
         case EvalOperation.LessThanOrEqual: return s1 <= s2;
@@ -39,7 +43,8 @@ function evalString(s1: string, s2: string, opr: EvalOperation): boolean {
 function parseEvalOperation(evalOpr: string): EvalOperation | null {
     evalOpr = evalOpr.trim();
     switch (evalOpr) {
-        case '=': return EvalOperation.Equals;
+        case '==': return EvalOperation.Equals;
+        case '!=': return EvalOperation.Different;
         case '<': return EvalOperation.LessThan;
         case '>': return EvalOperation.GreaterThan;
         case '=<': return EvalOperation.LessThanOrEqual;

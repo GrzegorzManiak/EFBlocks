@@ -34,13 +34,13 @@
         referenceInput = "";
     }
 
-    function saveConstant() {
+    function saveConstant(bypass = false) {
         console.log("Saving constant", constantInput);
         if (variableData === null) return closeDrawer();
 
         if (
-            constantInput.trim() === "" ||
-            constantInput.length < 3
+            (constantInput.trim() === "" ||
+            constantInput.length < 3) && !bypass
         ) return reset();
 
         const id = variableData.block.id + variableData.segment.id + variableData.input.id;
@@ -77,6 +77,11 @@
         closeDrawer();
     }
 
+    function setConstant(value: string) {
+        constantInput = value;
+        saveConstant(true);
+    }
+
     function reset() {
         closeDrawer();
         if (variableData === null) return;
@@ -97,18 +102,61 @@
     <Dialog.Root bind:open={variableDrawerOpen} >
         <Dialog.Content>
 
-            <Tabs.Root class="w-full" value={
-                variableData.input.mode === Blocks.Renderer.Types.InputMode.Read ?
-                    variableData.input.isConstant === true ? "Constant" : "Reference" : "Reference"
-            }>
+            <Tabs.Root class="w-full" value={variableData.input.internalName === 'eval' ? "Eval" : (variableData.input.mode === Blocks.Renderer.Types.InputMode.Read ? (variableData.input.isConstant ? "Constant" : "Reference") : "Reference")}>
                 <Tabs.List class="grid w-full grid-cols-2">
-                    {#if variableData.input.mode === Blocks.Renderer.Types.InputMode.Read}
-                        <Tabs.Trigger value="Constant">Constant</Tabs.Trigger>
-                        <Tabs.Trigger value="Reference">Reference</Tabs.Trigger>
+                    {#if variableData.input.internalName === 'eval'}
+                        <Tabs.Trigger value="Eval">Eval</Tabs.Trigger>
                     {:else}
-                        <Tabs.Trigger value="Reference" class="col-span-2">Reference</Tabs.Trigger>
+                        {#if variableData.input.mode === Blocks.Renderer.Types.InputMode.Read}
+                            <Tabs.Trigger value="Constant">Constant</Tabs.Trigger>
+                            <Tabs.Trigger value="Reference">Reference</Tabs.Trigger>
+                        {:else}
+                            <Tabs.Trigger value="Reference" class="col-span-2">Reference</Tabs.Trigger>
+                        {/if}
                     {/if}
                 </Tabs.List>
+
+                <Tabs.Content value="Eval" class="border-none p-0 m-0">
+                    <Card.Root class="border-none shadow-none p-0 m-0">
+                        <Card.Header class="p-0 mt-4">
+                            <Card.Title>Evaluation Operator</Card.Title>
+                            <Card.Description>
+                                These are used when you want to compare a value with another value.
+                            </Card.Description>
+                        </Card.Header>
+                        <Card.Content class="space-y-2 p-0 mt-4">
+                            <div class="flex flex-row gap-2 flex-wrap">
+                                <Button
+                                        variant={constantInput === "==" ? "default" : "outline"}
+                                        class="flex-grow" on:click={() => setConstant("==")}>Equal</Button>
+
+                                <Button
+                                        variant={constantInput === "!=" ? "default" : "outline"}
+                                        class="flex-grow" on:click={() => setConstant("!=")}>Not Equal</Button>
+
+                                <Button
+                                        variant={constantInput === ">" ? "default" : "outline"}
+                                        class="flex-grow" on:click={() => setConstant(">")}>Greater Than</Button>
+
+                                <Button
+                                        variant={constantInput === "<" ? "default" : "outline"}
+                                        class="flex-grow" on:click={() => setConstant("<")}>Less Than</Button>
+
+                                <Button
+                                        variant={constantInput === ">=" ? "default" : "outline"}
+                                        class="flex-grow" on:click={() => setConstant(">=")}>Greater Than or Equal</Button>
+
+                                <Button
+                                        variant={constantInput === "<=" ? "default" : "outline"}
+                                        class="flex-grow" on:click={() => setConstant("<=")}>Less Than or Equal</Button>
+                            </div>
+                        </Card.Content>
+                        <Card.Footer class="p-0 mt-4 flex flex-row gap-2">
+                            <Button variant='destructive' class="bg-red-400 w-full" on:click={reset}> Reset</Button>
+                        </Card.Footer>
+                    </Card.Root>
+                </Tabs.Content>
+
                 <Tabs.Content value="Constant" class="border-none p-0 m-0">
                     <Card.Root class="border-none shadow-none p-0 m-0">
                         <Card.Header class="p-0 mt-4">
