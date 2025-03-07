@@ -5,6 +5,7 @@
 
     import VariableDrawer from './drawer.svelte';
     import {VariableStore} from "../../blocks/executer/variable";
+    import {Button} from "@/button";
 
     const variableStore = new VariableStore();
     const debug = true;
@@ -32,6 +33,17 @@
         },
     }
 
+    let allBlocks: Blocks.Block[] = [];
+    function findRootBlocks(blocks: Blocks.Block[]): Blocks.Block[] {
+        const rootBlocks = [];
+        for (const b of blocks) {
+            if (!b.primaryDivot || !b.primaryDivot?.previous) {
+                rootBlocks.push(b);
+            }
+        }
+        return rootBlocks;
+    }
+
     let editorElement: HTMLDivElement;
     onMount(() => {
         const stage = new Konva.Stage({
@@ -42,8 +54,6 @@
         });
 
         const { layer, gridLayer } = Blocks.createStage(stage);
-
-        const allBlocks = []
         let y = 0;
         const width = 200;
 
@@ -66,6 +76,12 @@
             bind:variableRest
             bind:variableData
             bind:variableDrawerOpen />
+
+    {#if debug}
+        <div class="absolute top-0 left-0 z-10">
+            <Button on:click={() => console.log(findRootBlocks(allBlocks))}>Dump Root Blocks</Button>
+        </div>
+    {/if}
 </div>
 
 <div
