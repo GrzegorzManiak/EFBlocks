@@ -242,6 +242,42 @@
         event.dataTransfer!.dropEffect = 'copy';
     }
 
+    function randomNumber(min: number, max: number) {
+        return Math.floor(Math.random() * (max - min + 1) + min);
+    }
+    async function sleep(ms: number) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    let agentRunning = $state(false);
+    let agentButtonText = $state("Run Agent");
+    let loading = $state(false);
+    async function runAgent() {
+        loading = true;
+
+        if (agentRunning) {
+            agentButtonText = "Stopping...";
+            await sleep(randomNumber(200, 700));
+            agentButtonText = "Run Agent";
+            agentRunning = false;
+            loading = false;
+            return;
+        }
+
+        agentButtonText = "Running...";
+        await sleep(randomNumber(200, 700));
+        agentButtonText = "Generating Code...";
+        await sleep(randomNumber(200, 700));
+        agentButtonText = "Uploading Code...";
+        await sleep(randomNumber(200, 700));
+        agentButtonText = "Running Code...";
+        await sleep(randomNumber(200, 700));
+        agentButtonText = "Stop Agent";
+        agentRunning = true;
+        loading = false;
+    }
+
+
     let editorElement: HTMLDivElement;
     let layer: Konva.Layer;
     onMount(async() => {
@@ -302,8 +338,20 @@
 </div>
 
 <div class="flex h-screen">
+    <div class="w-screen absolute top-0 left-0 z-20">
+        <div class="flex justify-center gap-4 p-2">
+            <div class="p-2 border w-min flex flex-row justify-between align-center bg-white rounded-md">
+                <Button
+                        class="w-[10rem]"
+                        disabled={loading}
+                        variant={agentRunning ? "destructive" : "default"}
+                        on:click={runAgent}>{agentButtonText}</Button>
+            </div>
+        </div>
+    </div>
+
     <!-- Sidebar with blocks -->
-    <div class="border-flex flex-col overflow-auto w-[15rem] absolute top-0 left-0 h-full bg-white z-10">
+    <div class="border-flex border-r flex-col overflow-auto w-[15rem] absolute top-0 left-0 h-full bg-white z-10">
         <!-- Header -->
         <div class="p-4 border-b">
             <h1 class="text-xl font-bold">Blocks</h1>
