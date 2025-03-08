@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {onMount} from 'svelte';
+    import {onMount, onDestroy} from 'svelte';
     import * as Blocks from "../../../../blocks";
     import {IndicatorLine} from "../../../../blocks";
     import Konva from "konva";
@@ -14,7 +14,7 @@
     import {toast} from "svelte-sonner";
 
     let variableStore = $state(new VariableStore());
-    const debug = true;
+    const debug = false;
 
     function getProjectIdFromUrl(url: string): string | null {
         const match = url.match(/\/project\/([^\/]+)\/editor/);
@@ -326,7 +326,7 @@
         pageChangeLock = false;
     }
 
-    function marshalProject(): Blocks.Project {
+    function marshalProject(name: string): Blocks.Project {
         // -- save the current page
         pageData.set(currentPage, serializeBlocks(allBlocks));
         pageCode.set(currentPage, generateInputBlockCode(allBlocks));
@@ -342,8 +342,12 @@
             });
         }
 
+        const lastModified = new Date().toISOString();
+        console.log("Marshalling project", name, projectId, lastModified);
         return {
             id: projectId,
+            name: name,
+            lastModified: lastModified,
             pages,
             currentPage,
             variableStore
@@ -382,6 +386,7 @@
         variableStore = project.variableStore;
 
         pageChangeLock = false;
+        projectName = project.name;
         pageChange("", currentPage, true);
     }
 
@@ -400,14 +405,16 @@
         if (saving) return;
         saving = true;
         await sleep(randomNumber(200, 700));
-        const project = marshalProject();
+        const project = marshalProject(projectName);
         serializeProject(project);
         toast.success("Project saved");
         saving = false;
     }
 
+    let projectName: string = $state("");
     let editorElement: HTMLDivElement;
     let layer: Konva.Layer;
+    let save_proj: number;
     onMount(async() => {
         projectId = getProjectIdFromUrl(window.location.href) ?? "";
         if (!projectId) throw new Error(`Could not find project ID in URL: ${window.location.href}`);
@@ -437,15 +444,23 @@
         // }
 
         layer.add(Blocks.IndicatorLine);
+        attemptLoadProject();
 
         setTimeout(() => {
             setupDraggableImages();
             setupDropZone();
         }, 100);
 
-        setInterval(() => {
+        save_proj = setInterval(() => {
             saveProject();
         }, 30_000);
+
+        console.log("Editor mounted");
+    });
+
+    onDestroy(() => {
+        clearInterval(save_proj);
+        console.log("Editor unmounted and interval cleared");
     });
 </script>
 
@@ -475,9 +490,9 @@
             }}>Generate Input Block Code</Button>
             <Button on:click={() => downloadDefaultBlocks()}>Render Default Blocks</Button>
             <Button on:click={() => console.log(variableStore.serialize())}>Dump Variable Store</Button>
-            <Button on:click={() => console.log(marshalProject())}>Dump Project</Button>
-            <Button on:click={() => console.log(serializeProject(marshalProject()))}>Serialize Project</Button>
-            <Button on:click={() => console.log(deserializeProject(serializeProject(marshalProject())))}>Deserialize Project</Button>
+            <Button on:click={() => console.log(marshalProject(projectName))}>Dump Project</Button>
+            <Button on:click={() => console.log(serializeProject(marshalProject(projectName)))}>Serialize Project</Button>
+            <Button on:click={() => console.log(deserializeProject(serializeProject(marshalProject(projectName))))}>Deserialize Project</Button>
             <Button on:click={() => attemptLoadProject()}>(Re) Load Project</Button>
         </div>
     </div>
@@ -514,7 +529,7 @@
 
                 <AlertDialog.Root>
                     <AlertDialog.Trigger asChild let:builder>
-                        <Button builders={[builder]} variant="destructive">
+                        <Button builders={[builder]} variant="destructive" disabled={loading}>
                             <Trash2 class="h-6 w-6 text-white" />
                         </Button>
                     </AlertDialog.Trigger>
@@ -536,14 +551,14 @@
     </div>
 
     <!-- Sidebar with blocks -->
-    <div class="border-flex border-r flex-col overflow-auto w-[15rem] absolute top-0 left-0 h-full bg-white z-10">
+    <div class="border-flex border-r flex-col overflow-auto w-[18rem] absolute top-0 left-0 h-full bg-white z-10">
         <!-- Header -->
         <div class="p-4 border-b">
             <h1 class="text-xl font-bold">Blocks</h1>
         </div>
 
         <!-- Scrollable block container -->
-        <div class="p-4 overflow-auto flex-1 w-[15rem]">
+        <div class="p-4 overflow-auto flex-1">
             {#if imagesVisible}
                 <div class="flex flex-wrap gap-4">
                     {#each blockImages as [name, url]}

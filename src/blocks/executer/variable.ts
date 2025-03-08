@@ -22,12 +22,16 @@ class VariableStore {
 	}
 
 	static deserialize(serialized: string): VariableStore {
-		const entries = JSON.parse(serialized) as Array<[string, string]>;
-		const store = new VariableStore();
-		for (const [key, value] of entries) {
-			store.set(key, value);
+		try {
+			const entries = JSON.parse(serialized) as Array<[string, string]>;
+			const store = new VariableStore();
+			for (const [key, value] of entries) {
+				store.set(key, value);
+			}
+			return store;
+		} catch (e) {
+			return new VariableStore();
 		}
-		return store;
 	}
 
 	clear(): void {
