@@ -9,6 +9,7 @@
     import {VariableStore} from "../../blocks/executer/variable";
     import {Button} from "@/button";
     import {Input} from "@/input";
+    import {IndicatorLine} from "../../blocks";
 
     const variableStore = new VariableStore();
     const debug = true;
@@ -283,9 +284,25 @@
     }
 
     let pageData: Map<string, string> = new Map();
+    let pageCode: Map<string, Array<string>> = new Map();
+    let pageChangeLock = false;
+
+    // auto save
+    setInterval(() => {
+        if (pageChangeLock) return;
+        pageChangeLock = true;
+        pageData.set(currentPage, serializeBlocks(allBlocks));
+        pageChangeLock = false;
+        console.log("Auto saving page data for", currentPage);
+    }, 10000);
+
     function pageChange(from: string, to: string) {
+        if (pageChangeLock) return;
+        pageChangeLock = true;
+
         console.log("Changing page from", from, "to", to);
         pageData.set(from, serializeBlocks(allBlocks));
+        pageCode.set(from, generateInputBlockCode(allBlocks));
 
         layer.destroyChildren();
         allBlocks = [];
@@ -294,11 +311,17 @@
         if (pageData.has(to)) {
             console.log("Loading page data for", to);
             const data = pageData.get(to);
-            if (!data) return console.warn("No data found for page", to);
+            if (!data) {
+                pageChangeLock = false;
+                layer.add(IndicatorLine);
+                return console.warn("No data found for page", to);
+            }
             deserializeBlocks(data);
         }
 
+        layer.add(IndicatorLine);
         layer.batchDraw();
+        pageChangeLock = false;
     }
 
     let editorElement: HTMLDivElement;

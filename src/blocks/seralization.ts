@@ -29,7 +29,6 @@ function deserialize(serialized: string, layer: Konva.Layer, callback: CallbackD
     const data = JSON.parse(serialized);
 
     layer.removeChildren();
-    layer.add(IndicatorLine);
     Notches.clear();
     Divots.clear();
 
