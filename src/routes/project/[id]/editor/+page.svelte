@@ -16,7 +16,7 @@
     const api = 'http://127.0.0.1:3000/';
 
     let variableStore = $state(new VariableStore());
-    const debug = true;
+    const debug = false;
 
     function getProjectIdFromUrl(url: string): string | null {
         const match = url.match(/\/project\/([^\/]+)\/editor/);

@@ -493,7 +493,6 @@ const prompt: BlockRenderer.Types.BlockDefinition = {
 	]
 }
 
-
 const aiIfFunc: BlockRenderer.Types.BlockDefinition = {
 	name: 'aiIfFunc',
 	configuration: {
@@ -540,6 +539,74 @@ const aiIfFunc: BlockRenderer.Types.BlockDefinition = {
 	]
 };
 
+const textToSpeech: BlockRenderer.Types.BlockDefinition = {
+	name: 'generateVoice',
+	isAsync: true,
+	configuration: {
+		color: colors.Action
+	},
+	segments: [
+		{
+			name: 'tts',
+			id: randomId(),
+			text: 'Text to Speech',
+			type: BlockRenderer.Types.BlockSegment.Header,
+			notch: true,
+			divot: true,
+			inputs: [
+				{
+					internalName: 'text',
+					id: randomId(),
+					name: 'Text',
+					type: InputType.Variable,
+					mode: InputMode.Read
+				},
+				{
+					internalName: 'outputPath',
+					id: randomId(),
+					name: 'Output Path',
+					type: InputType.Variable,
+					mode: InputMode.Write
+				}
+			]
+		}
+	]
+}
+
+const sendWhatsappVoiceMessage: BlockRenderer.Types.BlockDefinition = {
+	name: 'sendWhatsappVoiceMessage',
+	isAsync: true,
+	configuration: {
+		color: colors.Action
+	},
+	segments: [
+		{
+			name: 'tts',
+			id: randomId(),
+			text: 'Send Whatsapp Voice Message',
+			type: BlockRenderer.Types.BlockSegment.Header,
+			notch: true,
+			divot: true,
+			inputs: [
+				{
+					internalName: 'phone',
+					id: randomId(),
+					name: 'Phone Number',
+					type: InputType.Variable,
+					mode: InputMode.Read
+				},
+				{
+					internalName: 'audioPath',
+					id: randomId(),
+					name: 'Audio Path',
+					type: InputType.Variable,
+					mode: InputMode.Read
+				}
+			]
+		}
+	]
+}
+
 const DefaultBlocks = [
 	startAgent,
 	endAgent,
@@ -555,7 +622,9 @@ const DefaultBlocks = [
 	sendSms,
 	sendWhatsapp,
 	prompt,
-	aiIfFunc
+	aiIfFunc,
+	textToSpeech,
+	sendWhatsappVoiceMessage
 ];
 
 export default DefaultBlocks;
