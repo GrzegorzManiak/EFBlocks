@@ -19,6 +19,11 @@ type DragResult = {
 	divot: SnapPointRecord;
 }
 
+function clear() {
+	Notches.clear();
+	Divots.clear();
+}
+
 interface SerializedBlock {
 	id: string;
 	name: string;
@@ -604,6 +609,7 @@ export {
 	type SerializedNotch,
 	type SerializedBlock,
 	Block,
+	clear,
 	Notches,
 	Divots
 }
