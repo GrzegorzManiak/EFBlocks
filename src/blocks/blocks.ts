@@ -425,6 +425,40 @@ const sendSms: BlockRenderer.Types.BlockDefinition = {
 	]
 }
 
+const prompt: BlockRenderer.Types.BlockDefinition = {
+	name: 'prompt',
+	isAsync: true,
+	configuration: {
+		color: colors.Action
+	},
+	segments: [
+		{
+			name: 'prompt',
+			id: randomId(),
+			text: 'Prompt',
+			type: BlockRenderer.Types.BlockSegment.Header,
+			notch: true,
+			divot: true,
+			inputs: [
+				{
+					internalName: 'message',
+					id: randomId(),
+					name: 'Message',
+					type: InputType.Variable,
+					mode: InputMode.Read
+				},
+				{
+					internalName: 'variable',
+					id: randomId(),
+					name: 'Output',
+					type: InputType.Variable,
+					mode: InputMode.Write
+				}
+			]
+		}
+	]
+}
+
 
 const DefaultBlocks = [
 	startAgent,
@@ -438,7 +472,8 @@ const DefaultBlocks = [
 	ifElifBlock,
 	ifBlock,
 	sendEmail,
-	sendSms
+	sendSms,
+	prompt
 ];
 
 export default DefaultBlocks;
