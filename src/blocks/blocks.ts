@@ -493,6 +493,47 @@ const prompt: BlockRenderer.Types.BlockDefinition = {
 	]
 }
 
+const promptOn: BlockRenderer.Types.BlockDefinition = {
+	name: 'promptOn',
+	isAsync: true,
+	configuration: {
+		color: colors.Action
+	},
+	segments: [
+		{
+			name: 'promptOn',
+			id: randomId(),
+			text: 'Prompt On',
+			type: BlockRenderer.Types.BlockSegment.Header,
+			notch: true,
+			divot: true,
+			inputs: [
+				{
+					internalName: 'message',
+					id: randomId(),
+					name: 'Message',
+					type: InputType.Variable,
+					mode: InputMode.Read
+				},
+				{
+					internalName: 'variable',
+					id: randomId(),
+					name: 'Output',
+					type: InputType.Variable,
+					mode: InputMode.Write
+				},
+				{
+					internalName: 'on',
+					id: randomId(),
+					name: 'On',
+					type: InputType.Variable,
+					mode: InputMode.Read
+				}
+			]
+		}
+	]
+}
+
 const aiIfFunc: BlockRenderer.Types.BlockDefinition = {
 	name: 'aiIfFunc',
 	configuration: {
@@ -622,6 +663,7 @@ const DefaultBlocks = [
 	sendSms,
 	sendWhatsapp,
 	prompt,
+	promptOn,
 	aiIfFunc,
 	textToSpeech,
 	sendWhatsappVoiceMessage
