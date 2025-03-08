@@ -425,6 +425,40 @@ const sendSms: BlockRenderer.Types.BlockDefinition = {
 	]
 }
 
+const sendWhatsapp: BlockRenderer.Types.BlockDefinition = {
+	name: 'sendWhatsapp',
+	isAsync: true,
+	configuration: {
+		color: colors.Action
+	},
+	segments: [
+		{
+			name: 'sendWhatsapp',
+			id: randomId(),
+			text: 'Send Whatsapp',
+			type: BlockRenderer.Types.BlockSegment.Header,
+			notch: true,
+			divot: true,
+			inputs: [
+				{
+					internalName: 'phone',
+					id: randomId(),
+					name: 'Phone',
+					type: InputType.Variable,
+					mode: InputMode.Read
+				},
+				{
+					internalName: 'message',
+					id: randomId(),
+					name: 'Message',
+					type: InputType.Variable,
+					mode: InputMode.Read
+				}
+			]
+		}
+	]
+}
+
 const prompt: BlockRenderer.Types.BlockDefinition = {
 	name: 'prompt',
 	isAsync: true,
@@ -460,6 +494,52 @@ const prompt: BlockRenderer.Types.BlockDefinition = {
 }
 
 
+const aiIfFunc: BlockRenderer.Types.BlockDefinition = {
+	name: 'aiIfFunc',
+	configuration: {
+		color: colors.Action,
+	},
+	segments: [
+		{
+			name: 'aiif',
+			id: randomId(),
+			text: 'AI If',
+			type: BlockRenderer.Types.BlockSegment.Header,
+			notch: true,
+			divot: true,
+			inputs: [
+				{
+					internalName: 'varA',
+					id: randomId(),
+					name: 'Variable A',
+					type: InputType.Variable,
+					mode: InputMode.Read
+				},
+				{
+					internalName: 'eval',
+					id: randomId(),
+					name: 'Eval',
+					type: InputType.EvalOperator,
+					mode: InputMode.Read
+				},
+				{
+					internalName: 'varB',
+					id: randomId(),
+					name: 'Variable B',
+					type: InputType.Variable,
+					mode: InputMode.Read
+				}
+			]
+		},
+		{
+			name: 'if-footer',
+			id: randomId(),
+			type: BlockRenderer.Types.BlockSegment.Footer,
+			notch: true
+		},
+	]
+};
+
 const DefaultBlocks = [
 	startAgent,
 	endAgent,
@@ -473,7 +553,9 @@ const DefaultBlocks = [
 	ifBlock,
 	sendEmail,
 	sendSms,
-	prompt
+	sendWhatsapp,
+	prompt,
+	aiIfFunc
 ];
 
 export default DefaultBlocks;
