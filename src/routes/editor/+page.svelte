@@ -282,6 +282,24 @@
         loading = false;
     }
 
+    let pageData: Map<string, string> = new Map();
+    function pageChange(from: string, to: string) {
+        console.log("Changing page from", from, "to", to);
+        pageData.set(from, serializeBlocks(allBlocks));
+
+        layer.destroyChildren();
+        allBlocks = [];
+        Blocks.clear();
+
+        if (pageData.has(to)) {
+            console.log("Loading page data for", to);
+            const data = pageData.get(to);
+            if (!data) return console.warn("No data found for page", to);
+            deserializeBlocks(data);
+        }
+
+        layer.batchDraw();
+    }
 
     let editorElement: HTMLDivElement;
     let layer: Konva.Layer;
@@ -346,12 +364,9 @@
     <div class="w-screen absolute top-0 left-0 z-20">
         <div class="flex justify-center gap-4 p-2">
             <div class="p-2 border w-min flex flex-row justify-between align-center bg-white rounded-md gap-2">
-<!--                <Input-->
-<!--                        disabled={loading}-->
-<!--                        placeholder="Page name"-->
-<!--                        class="w-[15rem]" />-->
 
                 <PageSelector
+                        {pageChange}
                         bind:currentPage
                         bind:allPages
                         bind:disabled={loading} />

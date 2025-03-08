@@ -11,10 +11,12 @@
         disabled = $bindable(false),
         allPages = $bindable(),
         currentPage = $bindable(),
+        pageChange
     } : {
         disabled: boolean,
         allPages: string[],
         currentPage: string,
+        pageChange: (from: string, to: string) => void
     } = $props();
 
     let open = $state(false);
@@ -23,10 +25,12 @@
 
     function createPage() {
         console.log("Creating a new page...", input);
+        const from = currentPage;
         allPages = [...allPages, input];
         currentPage = input;
         input = "";
         open = false;
+        pageChange(from, currentPage);
     }
 </script>
 
@@ -38,6 +42,7 @@
                 role="combobox"
                 aria-expanded={open}
                 class="w-[15rem] justify-between"
+                disabled={disabled}
         >
             {currentPage}
             <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -56,10 +61,14 @@
             <Command.Group>
                 {#each allPages as page}
                     <Command.Item
+                            disabled={disabled}
                             value={page}
                             onSelect={(currentValue) => {
+                                const from = currentPage;
                                 value = currentValue;
                                 currentPage = currentValue;
+                                open = false;
+                                pageChange(from, currentValue);
                             }}
                     >
                         <Check
