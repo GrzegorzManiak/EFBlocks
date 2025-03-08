@@ -30,4 +30,5 @@ export * from './block/helpers';
 export * from './block/block';
 export * from './stage';
 
+export * from './seralization';
 // export * from './executer';

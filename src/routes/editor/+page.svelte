@@ -6,6 +6,7 @@
     import VariableDrawer from './drawer.svelte';
     import {VariableStore} from "../../blocks/executer/variable";
     import {Button} from "@/button";
+    import blocks from "../../blocks/blocks";
 
     const variableStore = new VariableStore();
     const debug = true;
@@ -44,7 +45,19 @@
         return rootBlocks;
     }
 
+    function serializeBlocks(blocks: Blocks.Block[]): string {
+        return Blocks.serialize(blocks);
+    }
+
+    function deserializeBlocks(data: string): Blocks.Block[] {
+        allBlocks.forEach(b => b.group.destroy());
+        const newBlocks = Blocks.deserialize(data, layer, callbacks);
+        allBlocks = newBlocks;
+        return newBlocks;
+    }
+
     let editorElement: HTMLDivElement;
+    let layer: Konva.Layer;
     onMount(() => {
         const stage = new Konva.Stage({
             container: editorElement,
@@ -53,7 +66,9 @@
             draggable: true,
         });
 
-        const { layer, gridLayer } = Blocks.createStage(stage);
+        const { layer: stageLayer, gridLayer } = Blocks.createStage(stage);
+
+        layer = stageLayer;
         let y = 0;
         const width = 200;
 
@@ -80,6 +95,8 @@
     {#if debug}
         <div class="absolute top-0 left-0 z-10">
             <Button on:click={() => console.log(findRootBlocks(allBlocks))}>Dump Root Blocks</Button>
+            <Button on:click={() => console.log(serializeBlocks(allBlocks))}>Serialize Blocks</Button>
+            <Button on:click={() => console.log(deserializeBlocks(serializeBlocks(allBlocks)))}>Deserialize Blocks</Button>
         </div>
     {/if}
 </div>

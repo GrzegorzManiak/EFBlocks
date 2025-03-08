@@ -11,12 +11,43 @@ let activeId: string | undefined = undefined;
 type SnapPointGroup = Map<string, SnapPointRecord>;
 type SegmentMap = Map<string, SegmentDefinition>;
 
-const Notches: SnapPointGroup = new Map();
-const Divots: SnapPointGroup = new Map();
+let Notches: SnapPointGroup = new Map();
+let Divots: SnapPointGroup = new Map();
 
 type DragResult = {
 	notch: SnapPointRecord;
 	divot: SnapPointRecord;
+}
+
+interface SerializedBlock {
+	id: string;
+	name: string;
+	groupPosition: { x: number; y: number };
+	segments: Array<{
+		id: string;
+		type: string;
+		text?: string;
+		notch?: boolean;
+		divot?: boolean;
+		extraHeight?: number;
+		inputs: Array<{
+			id: string;
+			internalName: string;
+			type: string;
+			name: string;
+			extraWidth?: number;
+			mode: string;
+			key?: string;
+			displayText: string;
+			occupied: boolean;
+			isConstant: boolean;
+		}>;
+		name: string;
+	}>;
+	configuration: Renderer.Types.BlockDefinition;
+	primaryDivotId?: string;
+	primaryNotchId?: string;
+	isDynamic: boolean;
 }
 
 const snapRadius = 40;
@@ -29,9 +60,32 @@ const IndicatorLine = new Konva.Line({
 
 IndicatorLine.hide();
 
-class Block {
-	public readonly id: string = Math.random().toString(36).substr(2, 9);
+// notch id
+type NotchToDivotMap = Map<string, {
+	notchId: string;
+	divotId: string;
+	notchSegmentId: string;
+	divotSegmentId: string;
+	isPrimary: boolean;
+}>;
 
+function DumpNotchesMap() {
+	const map: NotchToDivotMap = new Map();
+	for (const [_, notch] of Notches) {
+		if (!notch.next) continue;
+		map.set(notch.id, {
+			notchId: notch.id,
+			divotId: notch.next.id,
+			notchSegmentId: notch.segmentId,
+			divotSegmentId: notch.next.segmentId,
+			isPrimary: notch.type === Renderer.Types.SnapPointType.PrimaryNotch
+		});
+	}
+	return map;
+}
+
+class Block {
+	public id: string = Math.random().toString(36).substr(2, 9);
 
 	public isDynamic: boolean = false;
 	public group: Konva.Group;
@@ -49,12 +103,145 @@ class Block {
 	public primaryDivot: SnapPointRecord | undefined;
 
 	public deepestChild: Block | undefined;
+	public inputs: Map<string, CreatedInput> = new Map();
+
+	public serialize() {
+		const segments = []
+		for (const segment of this.blockDefinition.segments) {
+			const auxSegment = this.segments.get(segment.id);
+			if (!auxSegment) continue;
+			const inputs: Array<Renderer.Types.Input> = [];
+			if (auxSegment.inputs) {
+				for (const input of auxSegment.inputs) {
+					const existing = this.inputs.get(input.id);
+					if (!existing) continue;
+
+					inputs.push({
+						id: input.id,
+						internalName: input.internalName,
+						type: input.type,
+						name: input.name,
+						extraWidth: input.extraWidth,
+						mode: input.mode,
+						key: input.key,
+						displayText: existing.text.text() ?? input.name,
+						occupied: existing.occupied ?? false,
+						isConstant: existing.isConstant ?? false
+					});
+				}
+			}
+
+			segments.push({
+				id: segment.id,
+				type: segment.type,
+				text: segment.text,
+				notch: segment.notch,
+				divot: segment.divot,
+				extraHeight: segment.extraHeight,
+				inputs,
+				name: segment.name
+			});
+		}
+
+		return {
+			id: this.id,
+			name: this.blockDefinition.name,
+			groupPosition: this.group.position(),
+			segments,
+			configuration: this.blockDefinition,
+			primaryDivotId: this.primaryDivot?.id,
+			primaryNotchId: this.primaryNotch?.id,
+			isDynamic: this.isDynamic
+		}
+	}
+
+	public static deserialize(data: SerializedBlock, layer: Konva.Layer, callbacks: CallbackDict): Block {
+
+		console.log(data)
+		const blockDefinition: Renderer.Types.BlockDefinition = {
+			...data.configuration,
+			name: data.name,
+			segments: data.segments.map(segment => {
+				const inputs: Array<Input> = [];
+				for (const input of segment.inputs) inputs.push({
+					id: input.id,
+					internalName: input.internalName,
+					type: input.type as unknown as Renderer.Types.InputType,
+					name: input.name,
+					extraWidth: input.extraWidth,
+					mode: input.mode as unknown as Renderer.Types.InputMode,
+					key: input.key
+				});
+
+				return {
+					id: segment.id,
+					type: segment.type as unknown as Renderer.Types.BlockSegment,
+					text: segment.text,
+					notch: segment.notch,
+					divot: segment.divot,
+					extraHeight: segment.extraHeight,
+					inputs,
+					name: segment.name
+				}
+			}),
+		}
+
+		const block = new Block(blockDefinition, layer, callbacks);
+
+		block.group.x(data.groupPosition.x);
+		block.group.y(data.groupPosition.y);
+
+		if (data.primaryNotchId) {
+			const primaryNotch = block.snapPoints.get(data.primaryNotchId);
+			if (primaryNotch) block.primaryNotch = primaryNotch;
+		}
+
+		if (data.primaryDivotId) {
+			const primaryDivot = block.snapPoints.get(data.primaryDivotId);
+			if (primaryDivot) block.primaryDivot = primaryDivot;
+		}
+
+		if (data.isDynamic) block.isDynamic = true;
+
+		const allInputs = data.segments.flatMap(s => s.inputs);
+		for (const input of allInputs) {
+			const variable = block.inputs.get(input.id);
+			if (!variable) continue;
+			block.updateInput(variable, {
+				displayText: input.displayText,
+				key: input.key,
+				occupied: input.occupied,
+				isConstant: input.isConstant,
+				id: input.id
+			});
+		}
+
+		// for (const [_, segment] of block.segments) {
+		// 	const auxSegment = data.segments.find(s => s.id === segment.id);
+		// 	if (!auxSegment || !auxSegment.inputs) continue;
+		// 	for (const input of auxSegment.inputs) {
+		// 		const existing = segment.inputs?.find(i => i.id === input.id);
+		// 		const inClass = block.variables.get(segment.id);
+		// 		if (!existing || !inClass || !inClass.inputs) continue;
+		// 		for (const createdInput of inClass.inputs.inputs) {
+		// 			if (createdInput.id === input.id) {
+		// 				block.updateInput(createdInput, input);
+		// 				break;
+		// 			}
+		// 		}
+		// 	}
+		// }
+
+		return block;
+	}
 
 	public constructor(
 		public blockDefinition: Renderer.Types.BlockDefinition,
 		private layer: Konva.Layer,
-		public callbacks: CallbackDict
+		public callbacks: CallbackDict,
 	) {
+		if (!blockDefinition.id) blockDefinition.id = this.id;
+
 		const [group, block, snapPoints, height, texts, variables] = Renderer.renderBlock(this.id, blockDefinition, {
 			extraWidth: 0,
 			addToGroup: true,
@@ -110,9 +297,8 @@ class Block {
 		}
 
 		this.segments = new Map();
-		for (const segment of blockDefinition.segments) {
+		for (const segment of blockDefinition.segments)
 			this.segments.set(segment.id, segment);
-		}
 
 		this.deepestChild = this;
 		this.addEventListeners();
@@ -120,23 +306,11 @@ class Block {
 	}
 
 	public addVariableClick(variable: CreatedInput, segmentId: string): void {
+		this.inputs.set(variable.id, variable);
 		variable.group.on('click', () => {
 			const segment = this.segments.get(segmentId);
 			if (!segment) return;
-
 			this.callbacks.variableClick(this, segment, variable);
-
-			// if (variable.occupied) {
-			// 	variable.occupied = false;
-			// 	variable.mainBody.fill(variable.originalColor);
-			// 	variable.text.text(variable.name);
-			// }
-			//
-			// else {
-			// 	variable.occupied = true;
-			// 	variable.mainBody.fill('rgba(255,255,255,0.71)');
-			// 	variable.text.text('Occupied');
-			// }
 		});
 	}
 
@@ -145,12 +319,17 @@ class Block {
 		key?: string;
 		occupied?: boolean;
 		isConstant?: boolean;
+		id?: string;
 	}) {
 		data = {
 			displayText: data.displayText ?? input.name,
 			key: data.key ?? input.key,
 			occupied: data.occupied ?? input.occupied,
 			isConstant: data.isConstant ?? input.isConstant
+		}
+
+		if (data.id !== input.id && data.id) {
+			input.id = data.id;
 		}
 
 		if (data.isConstant !== input.isConstant && data.isConstant !== undefined) {
@@ -235,6 +414,7 @@ class Block {
 			// console.log('Absolute position', this.getAbsolutePosition());
 
 			// console.log(generateJs(this));
+			console.log(this.serialize());
 		});
 	}
 
@@ -426,5 +606,11 @@ class Block {
 export default Block;
 export {
 	IndicatorLine,
-	Block
+	getDistanceBetween,
+	DumpNotchesMap,
+	type NotchToDivotMap,
+	type SerializedBlock,
+	Block,
+	Notches,
+	Divots
 }

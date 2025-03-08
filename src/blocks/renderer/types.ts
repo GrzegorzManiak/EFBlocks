@@ -73,6 +73,7 @@ type BlockDefinition = {
 	isEntry?: boolean;
 	segments: Array<SegmentDefinition>;
 	configuration: BlockConfiguration;
+	id?: string;
 }
 
 type Point = [number, number];
