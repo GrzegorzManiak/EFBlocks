@@ -45,6 +45,25 @@
         return rootBlocks;
     }
 
+    function findInputBlocks(blocks: Blocks.Block[]): Blocks.Block[] {
+        const rootBlocks = [];
+        for (const b of blocks) {
+            if (!b.primaryDivot) {
+                rootBlocks.push(b);
+            }
+        }
+        return rootBlocks;
+    }
+
+    function generateInputBlockCode(blocks: Blocks.Block[]) {
+        const rootBlocks = findInputBlocks(blocks);
+        const code = [];
+        for (const b of rootBlocks) {
+            code.push(Blocks.generateJs(b));
+        }
+        return code
+    }
+
     function serializeBlocks(blocks: Blocks.Block[]): string {
         return Blocks.serialize(blocks);
     }
@@ -101,11 +120,17 @@
             bind:variableDrawerOpen />
 
     {#if debug}
-        <div class="absolute top-0 left-0 z-10 flex gap-2">
+        <div class="absolute top-0 left-0 z-10 flex gap-2 flex-wrap w-full">
             <Button on:click={() => console.log(findRootBlocks(allBlocks))}>Dump Root Blocks</Button>
             <Button on:click={() => console.log(serializeBlocks(allBlocks))}>Serialize Blocks</Button>
             <Button on:click={() => console.log(deserializeBlocks(serializeBlocks(allBlocks)))}>Deserialize Blocks</Button>
             <Button on:click={() => dumpSortedBlockIds(allBlocks)}>Dump Sorted Block Ids</Button>
+            <Button on:click={() => console.log(findRootBlocks(allBlocks))}>Dump Root Blocks</Button>
+            <Button on:click={() => console.log(findInputBlocks(allBlocks))}>Dump Input Blocks</Button>
+            <Button on:click={() => {
+                const code = generateInputBlockCode(allBlocks);
+                code.forEach(c => console.log(c));
+            }}>Generate Input Block Code</Button>
         </div>
     {/if}
 </div>
