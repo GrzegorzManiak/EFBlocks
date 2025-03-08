@@ -61,19 +61,25 @@ const IndicatorLine = new Konva.Line({
 IndicatorLine.hide();
 
 // notch id
-type NotchToDivotMap = Map<string, {
+type SerializedNotch = {
+	notchBlockId: string;
+	divotBlockId: string;
 	notchId: string;
 	divotId: string;
 	notchSegmentId: string;
 	divotSegmentId: string;
 	isPrimary: boolean;
-}>;
+};
+
+type NotchToDivotMap = Map<string, SerializedNotch>;
 
 function DumpNotchesMap() {
 	const map: NotchToDivotMap = new Map();
 	for (const [_, notch] of Notches) {
 		if (!notch.next) continue;
 		map.set(notch.id, {
+			notchBlockId: notch.block.id,
+			divotBlockId: notch.next.block.id,
 			notchId: notch.id,
 			divotId: notch.next.id,
 			notchSegmentId: notch.segmentId,
@@ -124,6 +130,7 @@ class Block {
 						extraWidth: input.extraWidth,
 						mode: input.mode,
 						key: input.key,
+						// @ts-ignore
 						displayText: existing.text.text() ?? input.name,
 						occupied: existing.occupied ?? false,
 						isConstant: existing.isConstant ?? false
@@ -184,6 +191,7 @@ class Block {
 					name: segment.name
 				}
 			}),
+			id: data.id
 		}
 
 		const block = new Block(blockDefinition, layer, callbacks);
@@ -240,7 +248,10 @@ class Block {
 		private layer: Konva.Layer,
 		public callbacks: CallbackDict,
 	) {
-		if (!blockDefinition.id) blockDefinition.id = this.id;
+		if (blockDefinition.id) {
+			this.id = blockDefinition.id;
+			console.log('Block id', this.id);
+		}
 
 		const [group, block, snapPoints, height, texts, variables] = Renderer.renderBlock(this.id, blockDefinition, {
 			extraWidth: 0,
@@ -402,7 +413,7 @@ class Block {
 		});
 
 		this.group.on('click', () => {
-			// console.log('Block clicked', this);
+			console.log('Block clicked', this);
 			// const children = [];
 			// let next: Block | undefined = this;
 			// while (next !== undefined) {
@@ -609,6 +620,7 @@ export {
 	getDistanceBetween,
 	DumpNotchesMap,
 	type NotchToDivotMap,
+	type SerializedNotch,
 	type SerializedBlock,
 	Block,
 	Notches,
