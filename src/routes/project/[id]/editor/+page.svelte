@@ -274,12 +274,8 @@
             agentButtonText = "Stopping...";
             await sleep(randomNumber(200, 700));
 
-            const request = await fetch(`${api}stop`, {
+            const request = await fetch(`${api}stop?projectId=${projectId}`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: window.localStorage.getItem(`project-${projectId}`) ?? ""
             });
 
             agentButtonText = "Run Agent";
@@ -304,7 +300,7 @@
         const foolAsync = fool();
         await saveProject();
         try {
-            const request = await fetch(`${api}run`, {
+            const request = await fetch(`${api}run?projectId=${projectId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
