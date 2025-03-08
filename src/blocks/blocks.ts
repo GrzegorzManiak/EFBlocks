@@ -251,18 +251,44 @@ const setVariableTo: BlockRenderer.Types.BlockDefinition = {
 			divot: true,
 			inputs: [
 				{
-					internalName: 'from',
+					internalName: 'data',
 					id: randomId(),
-					name: 'Variable',
+					name: 'Data',
 					type: InputType.Variable,
 					mode: InputMode.Read
 				},
 				{
-					internalName: 'to',
+					internalName: 'variable',
 					id: randomId(),
-					name: 'Value',
+					name: 'Variable',
 					type: InputType.Variable,
 					mode: InputMode.Write
+				}
+			]
+		}
+	]
+}
+
+const logVariable: BlockRenderer.Types.BlockDefinition = {
+	name: 'logVariable',
+	configuration: {
+		color: colors.Variable
+	},
+	segments: [
+		{
+			name: 'logVariable',
+			id: randomId(),
+			text: 'Log Variable',
+			type: BlockRenderer.Types.BlockSegment.Header,
+			notch: true,
+			divot: true,
+			inputs: [
+				{
+					internalName: 'var',
+					id: randomId(),
+					name: 'Variable',
+					type: InputType.Variable,
+					mode: InputMode.Read
 				}
 			]
 		}
@@ -322,12 +348,14 @@ const onMessage: BlockRenderer.Types.BlockDefinition = {
 	]
 }
 
+
 const DefaultBlocks = [
 	startAgent,
 	endAgent,
 	broadCast,
 	onMessage,
 	setVariableTo,
+	logVariable,
 	whileLoop,
 	foreverLoop,
 	ifElifBlock,
