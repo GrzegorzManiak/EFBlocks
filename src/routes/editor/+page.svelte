@@ -56,6 +56,14 @@
         return newBlocks;
     }
 
+    function dumpSortedBlockIds(blocks: Blocks.Block[]) {
+        const ids = []
+        for (const b of blocks) {
+            ids.push(b.id);
+        }
+        console.log(ids.sort());
+    }
+
     let editorElement: HTMLDivElement;
     let layer: Konva.Layer;
     onMount(() => {
@@ -93,10 +101,11 @@
             bind:variableDrawerOpen />
 
     {#if debug}
-        <div class="absolute top-0 left-0 z-10">
+        <div class="absolute top-0 left-0 z-10 flex gap-2">
             <Button on:click={() => console.log(findRootBlocks(allBlocks))}>Dump Root Blocks</Button>
             <Button on:click={() => console.log(serializeBlocks(allBlocks))}>Serialize Blocks</Button>
             <Button on:click={() => console.log(deserializeBlocks(serializeBlocks(allBlocks)))}>Deserialize Blocks</Button>
+            <Button on:click={() => dumpSortedBlockIds(allBlocks)}>Dump Sorted Block Ids</Button>
         </div>
     {/if}
 </div>

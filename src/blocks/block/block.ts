@@ -163,8 +163,6 @@ class Block {
 	}
 
 	public static deserialize(data: SerializedBlock, layer: Konva.Layer, callbacks: CallbackDict): Block {
-
-		console.log(data)
 		const blockDefinition: Renderer.Types.BlockDefinition = {
 			...data.configuration,
 			name: data.name,
@@ -224,22 +222,6 @@ class Block {
 			});
 		}
 
-		// for (const [_, segment] of block.segments) {
-		// 	const auxSegment = data.segments.find(s => s.id === segment.id);
-		// 	if (!auxSegment || !auxSegment.inputs) continue;
-		// 	for (const input of auxSegment.inputs) {
-		// 		const existing = segment.inputs?.find(i => i.id === input.id);
-		// 		const inClass = block.variables.get(segment.id);
-		// 		if (!existing || !inClass || !inClass.inputs) continue;
-		// 		for (const createdInput of inClass.inputs.inputs) {
-		// 			if (createdInput.id === input.id) {
-		// 				block.updateInput(createdInput, input);
-		// 				break;
-		// 			}
-		// 		}
-		// 	}
-		// }
-
 		return block;
 	}
 
@@ -250,7 +232,6 @@ class Block {
 	) {
 		if (blockDefinition.id) {
 			this.id = blockDefinition.id;
-			console.log('Block id', this.id);
 		}
 
 		const [group, block, snapPoints, height, texts, variables] = Renderer.renderBlock(this.id, blockDefinition, {

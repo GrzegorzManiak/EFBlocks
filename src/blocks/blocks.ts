@@ -326,12 +326,12 @@ const DefaultBlocks = [
 	startAgent,
 	endAgent,
 	broadCast,
-	// onMessage,
-	// setVariableTo,
-	// whileLoop,
-	// foreverLoop,
-	// ifElifBlock,
-	// ifBlock,
+	onMessage,
+	setVariableTo,
+	whileLoop,
+	foreverLoop,
+	ifElifBlock,
+	ifBlock,
 ];
 
 export default DefaultBlocks;

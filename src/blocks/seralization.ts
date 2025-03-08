@@ -39,7 +39,6 @@ function deserialize(serialized: string, layer: Konva.Layer, callback: CallbackD
     const blockMap: Map<string, Block> = new Map();
     const deserializedBlocks: Array<Block> = [];
     for (const blockId in blocks) {
-        console.log(typeof blocks[blockId])
         const config = JSON.parse(blocks[blockId]) as SerializedBlock;
         config.id = blockId;
 
