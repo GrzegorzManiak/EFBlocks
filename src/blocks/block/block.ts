@@ -129,7 +129,7 @@ class Block {
 						name: input.name,
 						extraWidth: input.extraWidth,
 						mode: input.mode,
-						key: input.key,
+						key: existing.key,
 						// @ts-ignore
 						displayText: existing.text.text() ?? input.name,
 						occupied: existing.occupied ?? false,
