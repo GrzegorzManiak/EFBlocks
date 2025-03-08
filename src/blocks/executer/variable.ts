@@ -29,6 +29,10 @@ class VariableStore {
 		}
 		return store;
 	}
+
+	clear(): void {
+		this.store.clear();
+	}
 }
 
 const GlobalVariableStore = new VariableStore();

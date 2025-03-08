@@ -13,7 +13,7 @@
         variableRest = $bindable(),
         variableData = $bindable(),
         variableDrawerOpen = $bindable(),
-        variableStore,
+        variableStore = $bindable(),
     } : {
         variableRest: (constantText: string, referenceText: string) => void,
         variableStore: VariableStore,

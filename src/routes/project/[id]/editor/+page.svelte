@@ -1,6 +1,7 @@
 <script lang="ts">
     import {onMount} from 'svelte';
     import * as Blocks from "../../../../blocks";
+    import {IndicatorLine} from "../../../../blocks";
     import Konva from "konva";
 
     import VariableDrawer from './drawer.svelte';
@@ -8,10 +9,8 @@
 
     import {VariableStore} from "../../../../blocks/executer/variable";
     import {Button} from "@/button";
-    import {Input} from "@/input";
-    import {IndicatorLine} from "../../../../blocks";
 
-    const variableStore = new VariableStore();
+    let variableStore = $state(new VariableStore());
     const debug = true;
 
     function getProjectIdFromUrl(url: string): string | null {
@@ -155,6 +154,7 @@
         const images = document.querySelectorAll('.flex-wrap img');
         images.forEach((img, index) => {
             img.setAttribute('draggable', 'true');
+            // @ts-ignore
             img.addEventListener('dragstart', (event) => onDragStart(event, index));
         });
     }
@@ -291,15 +291,17 @@
     let pageCode: Map<string, Array<string>> = new Map();
     let pageChangeLock = false;
 
-    function pageChange(from: string, to: string) {
+    function pageChange(from: string, to: string, skifFrom = false) {
         if (!layer) return console.warn("Layer not initialized");
 
-        if (pageChangeLock) return;
-        pageChangeLock = true;
+        if (!skifFrom) {
+            if (pageChangeLock) return;
+            pageChangeLock = true;
 
-        console.log("Changing page from", from, "to", to);
-        pageData.set(from, serializeBlocks(allBlocks));
-        pageCode.set(from, generateInputBlockCode(allBlocks));
+            console.log("Changing page from", from, "to", to);
+            pageData.set(from, serializeBlocks(allBlocks));
+            pageCode.set(from, generateInputBlockCode(allBlocks));
+        }
 
         layer.destroyChildren();
         allBlocks = [];
@@ -347,12 +349,37 @@
 
     function serializeProject(project: Blocks.Project): string {
         const serialised = Blocks.SerializeProject(project);
+        window.localStorage.setItem(`project-${projectId}`, serialised);
         return serialised;
     }
 
     function deserializeProject(data: string): Blocks.Project {
-        const project = Blocks.DeserializeProject(data);
-        return project;
+        return Blocks.DeserializeProject(data);
+    }
+
+    function attemptLoadProject() {
+
+        const data = window.localStorage.getItem(`project-${projectId}`);
+        if (!data) return console.warn("No project data found for", projectId);
+
+        const project = deserializeProject(data);
+        if (!project) return console.warn("Failed to deserialize project data");
+
+        layer.destroyChildren();
+        allBlocks = [];
+        Blocks.clear();
+        layer.add(IndicatorLine);
+
+        currentPage = project.currentPage;
+        allPages = project.pages.map(p => p.name);
+        pageData = new Map(project.pages.map(p => [p.name, p.serialised]));
+        pageCode = new Map(project.pages.map(p => [p.name, p.code]));
+
+        variableStore.clear();
+        variableStore = project.variableStore;
+
+        pageChangeLock = false;
+        pageChange("", currentPage, true);
     }
 
     let editorElement: HTMLDivElement;
@@ -396,7 +423,7 @@
 
 <div class="absolute top-0 right-[15rem] z-10">
     <VariableDrawer
-            {variableStore}
+            bind:variableStore
             bind:variableRest
             bind:variableData
             bind:variableDrawerOpen />
@@ -418,6 +445,7 @@
             <Button on:click={() => console.log(marshalProject())}>Dump Project</Button>
             <Button on:click={() => console.log(serializeProject(marshalProject()))}>Serialize Project</Button>
             <Button on:click={() => console.log(deserializeProject(serializeProject(marshalProject())))}>Deserialize Project</Button>
+            <Button on:click={() => attemptLoadProject()}>(Re) Load Project</Button>
         </div>
     {/if}
 </div>
