@@ -442,6 +442,10 @@
             setupDraggableImages();
             setupDropZone();
         }, 100);
+
+        setInterval(() => {
+            saveProject();
+        }, 30_000);
     });
 </script>
 
