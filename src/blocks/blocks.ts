@@ -391,6 +391,40 @@ const sendEmail: BlockRenderer.Types.BlockDefinition = {
 	]
 }
 
+const sendSms: BlockRenderer.Types.BlockDefinition = {
+	name: 'sendSms',
+	isAsync: true,
+	configuration: {
+		color: colors.Action
+	},
+	segments: [
+		{
+			name: 'sendSms',
+			id: randomId(),
+			text: 'Send SMS',
+			type: BlockRenderer.Types.BlockSegment.Header,
+			notch: true,
+			divot: true,
+			inputs: [
+				{
+					internalName: 'phone',
+					id: randomId(),
+					name: 'Phone',
+					type: InputType.Variable,
+					mode: InputMode.Read
+				},
+				{
+					internalName: 'message',
+					id: randomId(),
+					name: 'Message',
+					type: InputType.Variable,
+					mode: InputMode.Read
+				}
+			]
+		}
+	]
+}
+
 
 const DefaultBlocks = [
 	startAgent,
@@ -403,7 +437,8 @@ const DefaultBlocks = [
 	foreverLoop,
 	ifElifBlock,
 	ifBlock,
-	sendEmail
+	sendEmail,
+	sendSms
 ];
 
 export default DefaultBlocks;
