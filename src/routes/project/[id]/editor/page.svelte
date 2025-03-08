@@ -41,7 +41,7 @@
                 variant="outline"
                 role="combobox"
                 aria-expanded={open}
-                class="w-[15rem] justify-between"
+                class="w-[12rem] justify-between"
                 disabled={disabled}
         >
             {currentPage}

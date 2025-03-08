@@ -10,7 +10,7 @@
     import {VariableStore} from "../../../../blocks/executer/variable";
     import {Button} from "@/button";
     import * as AlertDialog from "@/alert-dialog";
-    import {Trash, Trash2} from "lucide-svelte";
+    import {LoaderCircle, Save, Trash, Trash2} from "lucide-svelte";
     import {toast} from "svelte-sonner";
 
     let variableStore = $state(new VariableStore());
@@ -395,6 +395,17 @@
         toast.success(`Deleted page ${page}`);
     }
 
+    let saving = $state(false);
+    async function saveProject() {
+        if (saving) return;
+        saving = true;
+        await sleep(randomNumber(200, 700));
+        const project = marshalProject();
+        serializeProject(project);
+        toast.success("Project saved");
+        saving = false;
+    }
+
     let editorElement: HTMLDivElement;
     let layer: Konva.Layer;
     onMount(async() => {
@@ -481,9 +492,21 @@
 
                 <Button
                         class="w-[10rem]"
-                        disabled={loading}
+                        bind:disabled={loading}
                         variant={agentRunning ? "destructive" : "default"}
                         on:click={runAgent}>{agentButtonText}</Button>
+
+                <Button
+                        class="bg-green-500 hover:bg-green-600"
+                        variant="default"
+                        on:click={saveProject}
+                        disabled={loading}>
+                    {#if saving}
+                        <LoaderCircle class="h-6 w-6 text-white animate-spin" />
+                    {:else}
+                        <Save class="h-6 w-6 text-white" />
+                    {/if}
+                </Button>
 
                 <AlertDialog.Root>
                     <AlertDialog.Trigger asChild let:builder>
