@@ -4,8 +4,11 @@
     import Konva from "konva";
 
     import VariableDrawer from './drawer.svelte';
+    import PageSelector from './page.svelte';
+
     import {VariableStore} from "../../blocks/executer/variable";
     import {Button} from "@/button";
+    import {Input} from "@/input";
 
     const variableStore = new VariableStore();
     const debug = true;
@@ -18,6 +21,8 @@
         input: Blocks.Renderer.Inputs.CreatedInput,
     } | null = $state(null);
 
+    let currentPage: string = $state("Main");
+    let allPages: string[] = $state(["Main"]);
 
     const callbacks: Blocks.CallbackDict = {
         variableClick(block, segment, input) {
@@ -340,7 +345,17 @@
 <div class="flex h-screen">
     <div class="w-screen absolute top-0 left-0 z-20">
         <div class="flex justify-center gap-4 p-2">
-            <div class="p-2 border w-min flex flex-row justify-between align-center bg-white rounded-md">
+            <div class="p-2 border w-min flex flex-row justify-between align-center bg-white rounded-md gap-2">
+<!--                <Input-->
+<!--                        disabled={loading}-->
+<!--                        placeholder="Page name"-->
+<!--                        class="w-[15rem]" />-->
+
+                <PageSelector
+                        bind:currentPage
+                        bind:allPages
+                        bind:disabled={loading} />
+
                 <Button
                         class="w-[10rem]"
                         disabled={loading}
