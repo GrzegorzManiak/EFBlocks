@@ -302,14 +302,17 @@
 </div>
 
 <div class="flex h-screen">
-    <div class="border-r">
-        <div class="p-4">
+    <!-- Sidebar with blocks -->
+    <div class="border-flex flex-col overflow-auto w-[15rem] absolute top-0 left-0 h-full bg-white z-10">
+        <!-- Header -->
+        <div class="p-4 border-b">
             <h1 class="text-xl font-bold">Blocks</h1>
         </div>
 
-        <div class="p-4">
+        <!-- Scrollable block container -->
+        <div class="p-4 overflow-auto flex-1 w-[15rem]">
             {#if imagesVisible}
-                <div class="flex flex-wrap gap-4 w-[15rem]">
+                <div class="flex flex-wrap gap-4">
                     {#each blockImages as [name, url]}
                         <div>
                             <img src={url} alt={name} />
@@ -320,6 +323,7 @@
         </div>
     </div>
 
+    <!-- Main editor area -->
     <div
             id="container"
             class="flex-1 bg-white"
