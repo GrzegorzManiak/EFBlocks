@@ -8,6 +8,8 @@ const colors = {
 	Variable: '#8bffb9',
 	Message: '#ffc396',
 
+	Action: '#d48bff',
+
 	Start: '#CBFF8B',
 	End: '#FF8B8B',
 }
@@ -348,6 +350,46 @@ const onMessage: BlockRenderer.Types.BlockDefinition = {
 	]
 }
 
+const sendEmail: BlockRenderer.Types.BlockDefinition = {
+	name: 'sendEmail',
+	configuration: {
+		color: colors.Action
+	},
+	segments: [
+		{
+			name: 'sendEmail',
+			id: randomId(),
+			text: 'Send Email',
+			type: BlockRenderer.Types.BlockSegment.Header,
+			notch: true,
+			divot: true,
+			inputs: [
+				{
+					internalName: 'email',
+					id: randomId(),
+					name: 'Email',
+					type: InputType.Variable,
+					mode: InputMode.Read
+				},
+				{
+					internalName: 'message',
+					id: randomId(),
+					name: 'Message',
+					type: InputType.Variable,
+					mode: InputMode.Read
+				},
+				{
+					internalName: 'subject',
+					id: randomId(),
+					name: 'Subject',
+					type: InputType.Variable,
+					mode: InputMode.Read
+				}
+			]
+		}
+	]
+}
+
 
 const DefaultBlocks = [
 	startAgent,
@@ -360,6 +402,7 @@ const DefaultBlocks = [
 	foreverLoop,
 	ifElifBlock,
 	ifBlock,
+	sendEmail
 ];
 
 export default DefaultBlocks;

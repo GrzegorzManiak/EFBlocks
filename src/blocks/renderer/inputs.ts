@@ -38,7 +38,13 @@ function createVariableInput(rendererContext: Types.RendererContext, input: Type
 		fontSize,
 		fill: 'rgba(0,0,0,0.3)',
 		fontFamily: font,
+		ellipsis: true,
+		wrap: 'none',
+		width: rectWidth * 0.95
 	});
+
+	// make it so that the text can spill
+
 
 	const textX = (rectWidth / 2) - (text.width() / 2);
 	const textY = (height - fontSize) / 2;
@@ -77,6 +83,9 @@ function createEvalInput(rendererContext: Types.RendererContext, input: Types.In
 		fontSize,
 		fill: 'rgba(0,0,0,0.3)',
 		fontFamily: font,
+		ellipsis: true,
+		wrap: 'none',
+		width: evalMinimumWidth * 0.95
 	});
 
 	const textX = (evalMinimumWidth / 2) - (text.width() / 2);
