@@ -352,6 +352,7 @@ const onMessage: BlockRenderer.Types.BlockDefinition = {
 
 const sendEmail: BlockRenderer.Types.BlockDefinition = {
 	name: 'sendEmail',
+	isAsync: true,
 	configuration: {
 		color: colors.Action
 	},

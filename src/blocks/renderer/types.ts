@@ -70,6 +70,7 @@ type BlockConfiguration= {
 
 type BlockDefinition = {
 	name: string;
+	isAsync?: boolean;
 	isEntry?: boolean;
 	segments: Array<SegmentDefinition>;
 	configuration: BlockConfiguration;

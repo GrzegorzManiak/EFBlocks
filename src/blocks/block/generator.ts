@@ -44,13 +44,13 @@ function generateBlockCall(block: Block, indent: string): string {
 
 	// Build the STD call with block name and inputs.
 	const inputsStr = generateInputObject(block.variables);
-	code += indent + "STD." + block.name + "(" + inputsStr + "";
+	code += indent + "await STD." + block.name + "(" + inputsStr + "";
 
 	// Process any secondary branches (e.g. for if/else, while, etc.):
 	let secondaryBranchCodes: string[] = [];
 	for (const snapPoint of block.snapPoints.values()) {
 		if (snapPoint.type === SnapPointType.SecondaryNotch && snapPoint.next) {
-			let code = "() => {\n";
+			let code = "async () => {\n";
 			code += generateScopes(snapPoint.next.block, indent + "    ");
 			code += indent + "}";
 			secondaryBranchCodes.push([`"${snapPoint.segmentId}"`, code].join(": "));
@@ -70,7 +70,7 @@ function generateBlockCall(block: Block, indent: string): string {
 function generateForceScopeBlockCall(block: Block, indent: string): string {
 	let code = "";
 	const inputsStr = generateInputObject(block.variables);
-	code += indent + "STD." + block.name + "(";
+	code += indent + "await STD." + block.name + "(";
 
 	for (const snapPoint of block.snapPoints.values()) {
 		if (snapPoint.type === SnapPointType.SecondaryNotch && snapPoint.next) {
@@ -85,7 +85,7 @@ function generateForceScopeBlockCall(block: Block, indent: string): string {
 			code += ", ";
 		}
 
-		code += "() => {\n";
+		code += "async () => {\n";
 		code += generateScopes(block.primaryNotch.next.block, indent + "    ");
 		code += indent + "}";
 	}
