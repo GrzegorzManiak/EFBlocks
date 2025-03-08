@@ -399,19 +399,7 @@ class Block {
 		});
 
 		this.group.on('click', () => {
-			console.log('Block clicked', this);
-			// const children = [];
-			// let next: Block | undefined = this;
-			// while (next !== undefined) {
-			// 	children.push(next.name);
-			// 	next = next.primaryNotch?.next?.block;
-			// }
-			// console.log('Children', children);
-			// console.log('Deepest child', this.deepestChild?.name);
-			// console.log('Absolute position', this.getAbsolutePosition());
 
-			// console.log(generateJs(this));
-			console.log(this.serialize());
 		});
 	}
 

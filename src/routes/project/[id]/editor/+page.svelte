@@ -9,6 +9,9 @@
 
     import {VariableStore} from "../../../../blocks/executer/variable";
     import {Button} from "@/button";
+    import * as AlertDialog from "@/alert-dialog";
+    import {Trash, Trash2} from "lucide-svelte";
+    import {toast} from "svelte-sonner";
 
     let variableStore = $state(new VariableStore());
     const debug = true;
@@ -382,6 +385,16 @@
         pageChange("", currentPage, true);
     }
 
+    function deletePage(page: string) {
+        if (allPages.length === 1) return toast.error("Cannot delete the last page");
+        allPages = allPages.filter(p => p !== page);
+        pageData.delete(page);
+        pageCode.delete(page);
+        if (currentPage === page) currentPage = "Main";
+        pageChange("", currentPage, true);
+        toast.success(`Deleted page ${page}`);
+    }
+
     let editorElement: HTMLDivElement;
     let layer: Konva.Layer;
     onMount(async() => {
@@ -421,15 +434,20 @@
     });
 </script>
 
-<div class="absolute top-0 right-[15rem] z-10">
+<div class="absolute top-0 z-10">
     <VariableDrawer
             bind:variableStore
             bind:variableRest
             bind:variableData
             bind:variableDrawerOpen />
+</div>
 
-    {#if debug}
-        <div class="absolute top-0 right-0 z-10 flex gap-2 flex-wrap w-full">
+{#if debug}
+    <div class="absolute top-0 right-0 z-10 ">
+        <div class="flex flex-col gap-2 p-2 bg-white border rounded-md m-2">
+            <div class="pb-2 border-b">
+                <h1 class="text-xl font-bold">Debug Tools</h1>
+            </div>
             <Button on:click={() => console.log(findRootBlocks(allBlocks))}>Dump Root Blocks</Button>
             <Button on:click={() => console.log(serializeBlocks(allBlocks))}>Serialize Blocks</Button>
             <Button on:click={() => console.log(deserializeBlocks(serializeBlocks(allBlocks)))}>Deserialize Blocks</Button>
@@ -447,8 +465,8 @@
             <Button on:click={() => console.log(deserializeProject(serializeProject(marshalProject())))}>Deserialize Project</Button>
             <Button on:click={() => attemptLoadProject()}>(Re) Load Project</Button>
         </div>
-    {/if}
-</div>
+    </div>
+{/if}
 
 <div class="flex h-screen">
     <div class="w-screen absolute top-0 left-0 z-20">
@@ -466,6 +484,26 @@
                         disabled={loading}
                         variant={agentRunning ? "destructive" : "default"}
                         on:click={runAgent}>{agentButtonText}</Button>
+
+                <AlertDialog.Root>
+                    <AlertDialog.Trigger asChild let:builder>
+                        <Button builders={[builder]} variant="destructive">
+                            <Trash2 class="h-6 w-6 text-white" />
+                        </Button>
+                    </AlertDialog.Trigger>
+                    <AlertDialog.Content>
+                        <AlertDialog.Header>
+                            <AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
+                            <AlertDialog.Description>
+                                This action cannot be undone. This will permanently delete this page.
+                            </AlertDialog.Description>
+                        </AlertDialog.Header>
+                        <AlertDialog.Footer>
+                            <AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+                            <AlertDialog.Action on:click={() => deletePage(currentPage)}>Delete</AlertDialog.Action>
+                        </AlertDialog.Footer>
+                    </AlertDialog.Content>
+                </AlertDialog.Root>
             </div>
         </div>
     </div>
