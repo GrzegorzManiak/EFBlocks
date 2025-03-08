@@ -215,7 +215,7 @@ const whileLoop: BlockRenderer.Types.BlockDefinition = {
 }
 
 const foreverLoop: BlockRenderer.Types.BlockDefinition = {
-	name: 'foreverLoop',
+	name: 'forever',
 	configuration: {
 		color: colors.Loops
 	},

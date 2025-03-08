@@ -16,7 +16,10 @@ type Project = {
 }
 
 function SerializeProject(project: Project): string {
-    return JSON.stringify(project);
+    return JSON.stringify({
+        ...project,
+        variableStore: project.variableStore.serialize(),
+    });
 }
 
 function DeserializeProject(serialised: string): Project {

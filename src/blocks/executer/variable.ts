@@ -17,15 +17,14 @@ class VariableStore {
 		return this.store.get(key);
 	}
 
-	serialize(): string {
-		return JSON.stringify(Array.from(this.store.entries()));
+	serialize(): Array<[string, string]> {
+		return Array.from(this.store.entries())
 	}
 
-	static deserialize(serialized: string): VariableStore {
+	static deserialize(serialized: Array<[string, string]>): VariableStore {
 		try {
-			const entries = JSON.parse(serialized) as Array<[string, string]>;
 			const store = new VariableStore();
-			for (const [key, value] of entries) {
+			for (const [key, value] of serialized) {
 				store.set(key, value);
 			}
 			return store;

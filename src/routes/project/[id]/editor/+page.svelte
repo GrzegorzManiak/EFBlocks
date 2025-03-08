@@ -13,8 +13,10 @@
     import {LoaderCircle, Save, Trash, Trash2} from "lucide-svelte";
     import {toast} from "svelte-sonner";
 
+    const api = 'http://127.0.0.1:3000/';
+
     let variableStore = $state(new VariableStore());
-    const debug = false;
+    const debug = true;
 
     function getProjectIdFromUrl(url: string): string | null {
         const match = url.match(/\/project\/([^\/]+)\/editor/);
@@ -271,21 +273,54 @@
         if (agentRunning) {
             agentButtonText = "Stopping...";
             await sleep(randomNumber(200, 700));
+
+            const request = await fetch(`${api}stop`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: window.localStorage.getItem(`project-${projectId}`) ?? ""
+            });
+
             agentButtonText = "Run Agent";
             agentRunning = false;
             loading = false;
             return;
         }
 
-        agentButtonText = "Running...";
-        await sleep(randomNumber(200, 700));
-        agentButtonText = "Generating Code...";
-        await sleep(randomNumber(200, 700));
-        agentButtonText = "Uploading Code...";
-        await sleep(randomNumber(200, 700));
-        agentButtonText = "Running Code...";
-        await sleep(randomNumber(200, 700));
-        agentButtonText = "Stop Agent";
+        const fool = async () => {
+            agentButtonText = "Saving...";
+            agentButtonText = "Running...";
+            await sleep(randomNumber(200, 700));
+            agentButtonText = "Generating Code...";
+            await sleep(randomNumber(200, 700));
+            agentButtonText = "Uploading Code...";
+            await sleep(randomNumber(200, 700));
+            agentButtonText = "Running Code...";
+            await sleep(randomNumber(200, 700));
+            agentButtonText = "Stop Agent";
+        }
+
+        const foolAsync = fool();
+        await saveProject();
+        try {
+            const request = await fetch(`${api}run`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: window.localStorage.getItem(`project-${projectId}`) ?? ""
+            });
+        } catch (error) {
+            console.error("Failed to run agent:", error);
+            toast.error("Failed to run agent");
+            agentRunning = false;
+            loading = false;
+            agentButtonText = "Run Agent";
+            return;
+        }
+
+        await foolAsync;
         agentRunning = true;
         loading = false;
     }
@@ -343,7 +378,6 @@
         }
 
         const lastModified = new Date().toISOString();
-        console.log("Marshalling project", name, projectId, lastModified);
         return {
             id: projectId,
             name: name,
