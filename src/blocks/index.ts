@@ -8,4 +8,6 @@ export * from './stage';
 export * from './block/generator';
 
 export * from './seralization';
+export * from './project';
+
 // export * from './executer';

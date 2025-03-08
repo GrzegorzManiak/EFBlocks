@@ -1,18 +1,25 @@
 <script lang="ts">
     import {onMount} from 'svelte';
-    import * as Blocks from "../../blocks";
+    import * as Blocks from "../../../../blocks";
     import Konva from "konva";
 
     import VariableDrawer from './drawer.svelte';
     import PageSelector from './page.svelte';
 
-    import {VariableStore} from "../../blocks/executer/variable";
+    import {VariableStore} from "../../../../blocks/executer/variable";
     import {Button} from "@/button";
     import {Input} from "@/input";
-    import {IndicatorLine} from "../../blocks";
+    import {IndicatorLine} from "../../../../blocks";
 
     const variableStore = new VariableStore();
     const debug = true;
+
+    function getProjectIdFromUrl(url: string): string | null {
+        const match = url.match(/\/project\/([^\/]+)\/editor/);
+        return match ? match[1] : null;
+    }
+
+    let projectId = '';
 
     let variableDrawerOpen = $state(false);
     let variableRest = $state((constantText: string, referenceText: string) => {});
@@ -95,7 +102,6 @@
             block.group.x(0);
             block.group.y(0);
 
-            console.log(`Rendering block ${block.name}`);
 
             // export to png
             block.group.toImage({
@@ -125,8 +131,6 @@
             const block = new Blocks.Block(Blocks.DefaultBlocks[i], layer, callbacks);
             block.group.x(0);
             block.group.y(0);
-
-            console.log(`Rendering block ${block.name}`);
 
             const promise: Promise<void> = new Promise((resolve, reject) => {
                 block.group.toImage({
@@ -287,16 +291,9 @@
     let pageCode: Map<string, Array<string>> = new Map();
     let pageChangeLock = false;
 
-    // auto save
-    setInterval(() => {
-        if (pageChangeLock) return;
-        pageChangeLock = true;
-        pageData.set(currentPage, serializeBlocks(allBlocks));
-        pageChangeLock = false;
-        console.log("Auto saving page data for", currentPage);
-    }, 10000);
-
     function pageChange(from: string, to: string) {
+        if (!layer) return console.warn("Layer not initialized");
+
         if (pageChangeLock) return;
         pageChangeLock = true;
 
@@ -324,9 +321,47 @@
         pageChangeLock = false;
     }
 
+    function marshalProject(): Blocks.Project {
+        // -- save the current page
+        pageData.set(currentPage, serializeBlocks(allBlocks));
+        pageCode.set(currentPage, generateInputBlockCode(allBlocks));
+        if (allPages.indexOf(currentPage) === -1) allPages.push(currentPage);
+
+        const pages: Array<Blocks.Page> = [];
+        for (const [name, data] of pageData) {
+            const code = pageCode.get(name) ?? [];
+            pages.push({
+                name,
+                serialised: data,
+                code
+            });
+        }
+
+        return {
+            id: projectId,
+            pages,
+            currentPage,
+            variableStore
+        };
+    }
+
+    function serializeProject(project: Blocks.Project): string {
+        const serialised = Blocks.SerializeProject(project);
+        return serialised;
+    }
+
+    function deserializeProject(data: string): Blocks.Project {
+        const project = Blocks.DeserializeProject(data);
+        return project;
+    }
+
     let editorElement: HTMLDivElement;
     let layer: Konva.Layer;
     onMount(async() => {
+        projectId = getProjectIdFromUrl(window.location.href) ?? "";
+        if (!projectId) throw new Error(`Could not find project ID in URL: ${window.location.href}`);
+        console.log("Project ID:", projectId);
+
         const stage = new Konva.Stage({
             container: editorElement,
             width: window.innerWidth,
@@ -379,6 +414,10 @@
                 code.forEach(c => console.log(c));
             }}>Generate Input Block Code</Button>
             <Button on:click={() => downloadDefaultBlocks()}>Render Default Blocks</Button>
+            <Button on:click={() => console.log(variableStore.serialize())}>Dump Variable Store</Button>
+            <Button on:click={() => console.log(marshalProject())}>Dump Project</Button>
+            <Button on:click={() => console.log(serializeProject(marshalProject()))}>Serialize Project</Button>
+            <Button on:click={() => console.log(deserializeProject(serializeProject(marshalProject())))}>Deserialize Project</Button>
         </div>
     {/if}
 </div>

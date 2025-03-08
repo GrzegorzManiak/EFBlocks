@@ -1,5 +1,5 @@
 <script lang="ts">
-    import * as Blocks from "../../blocks";
+    import * as Blocks from "../../../../blocks";
     import * as Tabs from "@/tabs";
     import * as Card from "@/card";
     import { Input } from "@/input";
@@ -7,7 +7,7 @@
     import { Button } from "@/button";
     import {onMount} from "svelte";
     import {Label} from "@/label";
-    import type {VariableStore} from "../../blocks/executer/variable";
+    import type {VariableStore} from "../../../../blocks/executer/variable";
 
     let {
         variableRest = $bindable(),

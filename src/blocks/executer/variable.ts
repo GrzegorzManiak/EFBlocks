@@ -16,6 +16,19 @@ class VariableStore {
 		if (key === undefined || key === null) return undefined;
 		return this.store.get(key);
 	}
+
+	serialize(): string {
+		return JSON.stringify(Array.from(this.store.entries()));
+	}
+
+	static deserialize(serialized: string): VariableStore {
+		const entries = JSON.parse(serialized) as Array<[string, string]>;
+		const store = new VariableStore();
+		for (const [key, value] of entries) {
+			store.set(key, value);
+		}
+		return store;
+	}
 }
 
 const GlobalVariableStore = new VariableStore();
