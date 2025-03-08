@@ -267,6 +267,29 @@
     let agentRunning = $state(false);
     let agentButtonText = $state("Run Agent");
     let loading = $state(false);
+    async function checkServer() {
+        while (agentRunning) {
+            await sleep(500);
+            try {
+                const request = await fetch(`${api}highlight?projectId=${projectId}`);
+                const data = await request.json();
+                if (!data.running) {
+                    agentRunning = false;
+                    loading = false;
+                    agentButtonText = "Run Agent";
+                    toast.success("Agent stopped");
+                }
+
+                console.log("Agent status:", data);
+            }
+
+            catch (error) {
+                console.error("Failed to check agent status:", error);
+                toast.error("Failed to check agent status");
+            }
+        }
+    }
+
     async function runAgent() {
         loading = true;
 
@@ -318,6 +341,7 @@
 
         await foolAsync;
         agentRunning = true;
+        checkServer();
         loading = false;
     }
 
