@@ -8,7 +8,7 @@
     interface Message {
         id: string;
         content: string;
-        sender: 'user' | 'system' | 'info';
+        sender: 'user' | 'system' | 'info' | 'autoplay';
         timestamp: number;
         duration?: number;
         read: boolean;
@@ -212,6 +212,20 @@
         }
     }
 
+    function muteMicrophone() {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                stream.getAudioTracks().forEach(track => track.enabled = false);
+            });
+    }
+
+    function unmuteMicrophone() {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                stream.getAudioTracks().forEach(track => track.enabled = true);
+            });
+    }
+
     // Function to poll for new messages
     async function pollMessages(): Promise<void> {
         try {
@@ -222,6 +236,17 @@
                 if (data.messages.length > 0) {
                     // Add new messages and update last poll time
                     messages = [...messages, ...data.messages];
+                    data.messages.forEach(m => {
+                        if (m.sender === 'autoplay' && !m.read) {
+                            muteMicrophone();
+                            const audio = new Audio(m.content);
+                            audio.load();
+                            audio.play();
+                            audio.onended = () => {
+                                unmuteMicrophone();
+                            };
+                        }
+                    });
 
                     // Get the most recent timestamp
                     const timestamps = data.messages.map(m => m.timestamp);
@@ -355,7 +380,7 @@
                 <div class="text-center text-muted-foreground py-8">
                     {message.content}
                 </div>
-            {:else}
+            {:else if message.sender === 'user' || message.sender === 'system'}
                 <div class={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                     <div class={`max-w-xs px-4 py-2 rounded-lg ${
                     message.sender === 'user'
