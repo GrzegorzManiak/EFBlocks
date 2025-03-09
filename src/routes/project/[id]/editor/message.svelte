@@ -1,6 +1,7 @@
 <!-- MessageComponent.svelte -->
 <script lang="ts">
     import { onMount, onDestroy } from 'svelte';
+    import {Input} from "@/input";
 
     // Define interfaces for the data structures
     interface Message {
@@ -130,27 +131,27 @@
     }
 </script>
 
-<div class="flex flex-col h-full w-full max-w-md mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
-    <div class="bg-primary p-4 text-primary-foreground flex justify-between items-center">
-        <h2 class="text-xl font-bold">Messages</h2>
+<div class="flex flex-col h-full w-full max-w-md mx-auto overflow-hidden">
+    <div class="p-4 text-primary-foreground flex justify-between items-center border-b">
+        <h2 class="text-xl text-black font-bold">Messenger</h2>
         <div class="flex items-center space-x-2">
             <div class="flex items-center">
-                <span class="text-xs mr-1">Status:</span>
-                <span class={`h-2 w-2 rounded-full ${projectStatus.isRunning ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                <span class="text-xs mr-1 text-muted-foreground">Status:</span>
+                <span class={`h-2 w-2 rounded-full ${running ? 'bg-green-500' : 'bg-red-500'}`}></span>
             </div>
-            <div class="text-xs">
+            <div class="text-xs text-muted-foreground">
                 {projectStatus.totalResolved}/{projectStatus.totalPromises} tasks
             </div>
         </div>
     </div>
 
-    <div class="flex-1 overflow-y-auto p-4 space-y-4" style="max-height: 60vh;">
+    <div class="flex-1 overflow-y-auto p-4 space-y-4">
         {#each messages as message (message.id)}
             <div class={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div class={`max-w-xs px-4 py-2 rounded-lg ${
                     message.sender === 'user'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-200 text-gray-800'
                 }`}>
                     <p>{message.content}</p>
                     <span class="text-xs opacity-70">
@@ -165,9 +166,9 @@
         {/each}
     </div>
 
-    <div class="border-t p-4">
+    <div class="border-t p-4 mb-[5rem]">
         <form on:submit|preventDefault={sendMessage} class="flex space-x-2">
-            <input
+            <Input
                     type="text"
                     bind:value={newMessage}
                     placeholder="Type your message..."

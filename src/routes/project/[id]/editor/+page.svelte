@@ -14,11 +14,13 @@
     import * as AlertDialog from "@/alert-dialog";
     import {LoaderCircle, Save, Trash, Trash2} from "lucide-svelte";
     import {toast} from "svelte-sonner";
+    import {spring} from "svelte/motion";
 
     const api = 'http://127.0.0.1:3000/';
 
     let variableStore = $state(new VariableStore());
     const debug = true;
+    const openMessanger = true;
 
     function getProjectIdFromUrl(url: string): string | null {
         const match = url.match(/\/project\/([^\/]+)\/editor/);
@@ -467,7 +469,14 @@
         saving = false;
     }
 
-
+    // State for controlling the sliding card
+    // Spring animation for smooth sliding
+    const translateX = spring(100); // Start fully closed (100% translated)
+    let isOpen = $state(false);
+    function toggleCard() {
+        isOpen = !isOpen;
+        translateX.set(isOpen ? 0 : 100); // 0% = fully open, 100% = fully closed
+    }
 
     let projectName: string = $state("");
     let editorElement: HTMLDivElement;
@@ -530,31 +539,125 @@
             bind:variableDrawerOpen />
 </div>
 
-{#if debug}
-    <div class="absolute top-0 right-0 z-10 ">
-        <div class="flex flex-col gap-2 p-2 bg-white border rounded-md m-2">
-            <Call />
-            <MessageComponent bind:projectId bind:running={agentRunning} />
+{#if debug || openMessanger}
+    <div class="fixed top-0 right-0 h-screen z-50 flex">
+        <div
+                class="relative flex h-full"
+                style="transform: translateX({$translateX}%)"
+        >
+            <button
+                    class="absolute top-4 -left-12 w-12 h-12 bg-gray-800 text-white border-none rounded-l-md cursor-pointer flex items-center justify-center"
+                    on:click={toggleCard}
+            >
+                {isOpen ? '→' : '←'}
+            </button>
 
-            <div class="pb-2 border-b">
-                <h1 class="text-xl font-bold">Debug Tools</h1>
+            <div
+                    class="bg-gray-100 border-l border-gray-300 shadow-lg p-0 overflow-y-auto w-96 h-full"
+            >
+                <MessageComponent
+                        bind:running={agentRunning}
+                        bind:projectId/>
+
+                {#if debug}
+                    <div class="font-bold text-lg mb-4 pb-2 border-b border-gray-300">Debug Tools</div>
+
+                    <Call/>
+                    <button
+                            class="block w-full py-2 px-4 mb-2 bg-gray-200 border border-gray-300 rounded text-left cursor-pointer transition-colors hover:bg-gray-300"
+                            on:click={() => console.log(findRootBlocks(allBlocks))}
+                    >
+                        Dump Root Blocks
+                    </button>
+
+                    <button
+                            class="block w-full py-2 px-4 mb-2 bg-gray-200 border border-gray-300 rounded text-left cursor-pointer transition-colors hover:bg-gray-300"
+                            on:click={() => console.log(serializeBlocks(allBlocks))}
+                    >
+                        Serialize Blocks
+                    </button>
+
+                    <button
+                            class="block w-full py-2 px-4 mb-2 bg-gray-200 border border-gray-300 rounded text-left cursor-pointer transition-colors hover:bg-gray-300"
+                            on:click={() => console.log(deserializeBlocks(serializeBlocks(allBlocks)))}
+                    >
+                        Deserialize Blocks
+                    </button>
+
+                    <button
+                            class="block w-full py-2 px-4 mb-2 bg-gray-200 border border-gray-300 rounded text-left cursor-pointer transition-colors hover:bg-gray-300"
+                            on:click={() => dumpSortedBlockIds(allBlocks)}
+                    >
+                        Dump Sorted Block Ids
+                    </button>
+
+                    <button
+                            class="block w-full py-2 px-4 mb-2 bg-gray-200 border border-gray-300 rounded text-left cursor-pointer transition-colors hover:bg-gray-300"
+                            on:click={() => console.log(findRootBlocks(allBlocks))}
+                    >
+                        Dump Root Blocks
+                    </button>
+
+                    <button
+                            class="block w-full py-2 px-4 mb-2 bg-gray-200 border border-gray-300 rounded text-left cursor-pointer transition-colors hover:bg-gray-300"
+                            on:click={() => console.log(findInputBlocks(allBlocks))}
+                    >
+                        Dump Input Blocks
+                    </button>
+
+                    <button
+                            class="block w-full py-2 px-4 mb-2 bg-gray-200 border border-gray-300 rounded text-left cursor-pointer transition-colors hover:bg-gray-300"
+                            on:click={() => {
+              const code = generateInputBlockCode(allBlocks);
+              code.forEach(c => console.log(c));
+            }}
+                    >
+                        Generate Input Block Code
+                    </button>
+
+                    <button
+                            class="block w-full py-2 px-4 mb-2 bg-gray-200 border border-gray-300 rounded text-left cursor-pointer transition-colors hover:bg-gray-300"
+                            on:click={() => downloadDefaultBlocks()}
+                    >
+                        Render Default Blocks
+                    </button>
+
+                    <button
+                            class="block w-full py-2 px-4 mb-2 bg-gray-200 border border-gray-300 rounded text-left cursor-pointer transition-colors hover:bg-gray-300"
+                            on:click={() => console.log(variableStore.serialize())}
+                    >
+                        Dump Variable Store
+                    </button>
+
+                    <button
+                            class="block w-full py-2 px-4 mb-2 bg-gray-200 border border-gray-300 rounded text-left cursor-pointer transition-colors hover:bg-gray-300"
+                            on:click={() => console.log(marshalProject(projectName))}
+                    >
+                        Dump Project
+                    </button>
+
+                    <button
+                            class="block w-full py-2 px-4 mb-2 bg-gray-200 border border-gray-300 rounded text-left cursor-pointer transition-colors hover:bg-gray-300"
+                            on:click={() => console.log(serializeProject(marshalProject(projectName)))}
+                    >
+                        Serialize Project
+                    </button>
+
+                    <button
+                            class="block w-full py-2 px-4 mb-2 bg-gray-200 border border-gray-300 rounded text-left cursor-pointer transition-colors hover:bg-gray-300"
+                            on:click={() => console.log(deserializeProject(serializeProject(marshalProject(projectName))))}
+                    >
+                        Deserialize Project
+                    </button>
+
+                    <button
+                            class="block w-full py-2 px-4 mb-2 bg-gray-200 border border-gray-300 rounded text-left cursor-pointer transition-colors hover:bg-gray-300"
+                            on:click={() => attemptLoadProject()}
+                    >
+                        (Re) Load Project
+                    </button>
+                {/if}
             </div>
-            <Button on:click={() => console.log(findRootBlocks(allBlocks))}>Dump Root Blocks</Button>
-            <Button on:click={() => console.log(serializeBlocks(allBlocks))}>Serialize Blocks</Button>
-            <Button on:click={() => console.log(deserializeBlocks(serializeBlocks(allBlocks)))}>Deserialize Blocks</Button>
-            <Button on:click={() => dumpSortedBlockIds(allBlocks)}>Dump Sorted Block Ids</Button>
-            <Button on:click={() => console.log(findRootBlocks(allBlocks))}>Dump Root Blocks</Button>
-            <Button on:click={() => console.log(findInputBlocks(allBlocks))}>Dump Input Blocks</Button>
-            <Button on:click={() => {
-                const code = generateInputBlockCode(allBlocks);
-                code.forEach(c => console.log(c));
-            }}>Generate Input Block Code</Button>
-            <Button on:click={() => downloadDefaultBlocks()}>Render Default Blocks</Button>
-            <Button on:click={() => console.log(variableStore.serialize())}>Dump Variable Store</Button>
-            <Button on:click={() => console.log(marshalProject(projectName))}>Dump Project</Button>
-            <Button on:click={() => console.log(serializeProject(marshalProject(projectName)))}>Serialize Project</Button>
-            <Button on:click={() => console.log(deserializeProject(serializeProject(marshalProject(projectName))))}>Deserialize Project</Button>
-            <Button on:click={() => attemptLoadProject()}>(Re) Load Project</Button>
         </div>
     </div>
 {/if}
