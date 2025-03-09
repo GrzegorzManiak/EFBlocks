@@ -172,12 +172,12 @@
                     bind:value={newMessage}
                     placeholder="Type your message..."
                     class="flex-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                    disabled={running}
+                    disabled={!running}
             />
             <button
                     type="submit"
                     class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
-                    disabled={!newMessage.trim() || running}
+                    disabled={!newMessage.trim() || !running}
             >
                 {isLoading ? 'Sending...' : 'Send'}
             </button>

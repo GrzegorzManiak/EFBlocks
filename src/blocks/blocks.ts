@@ -425,6 +425,33 @@ const sendSms: BlockRenderer.Types.BlockDefinition = {
 	]
 }
 
+const sendLocalText: BlockRenderer.Types.BlockDefinition = {
+	name: 'sendLocalText',
+	isAsync: true,
+	configuration: {
+		color: colors.Action
+	},
+	segments: [
+		{
+			name: 'sendSms',
+			id: randomId(),
+			text: 'Send Local Text',
+			type: BlockRenderer.Types.BlockSegment.Header,
+			notch: true,
+			divot: true,
+			inputs: [
+				{
+					internalName: 'message',
+					id: randomId(),
+					name: 'Message',
+					type: InputType.Variable,
+					mode: InputMode.Read
+				}
+			]
+		}
+	]
+}
+
 const sendWhatsapp: BlockRenderer.Types.BlockDefinition = {
 	name: 'sendWhatsapp',
 	isAsync: true,
@@ -661,6 +688,7 @@ const DefaultBlocks = [
 	ifBlock,
 	sendEmail,
 	sendSms,
+	sendLocalText,
 	sendWhatsapp,
 	prompt,
 	promptOn,
