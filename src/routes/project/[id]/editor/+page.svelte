@@ -499,6 +499,12 @@
         blockImages = await renderDefaultBlocks();
         imagesVisible = true;
 
+        // -- resize
+        window.addEventListener('resize', () => {
+            stage.width(window.innerWidth);
+            stage.height(window.innerHeight);
+        });
+
         // let y = 0;
         // const width = 200;
         // for (let i = 0; i < Blocks.DefaultBlocks.length; i++) {

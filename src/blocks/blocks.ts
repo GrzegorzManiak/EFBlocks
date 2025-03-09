@@ -452,6 +452,33 @@ const sendLocalText: BlockRenderer.Types.BlockDefinition = {
 	]
 }
 
+const waitForLocalText: BlockRenderer.Types.BlockDefinition = {
+	name: 'waitForLocalText',
+	isAsync: true,
+	configuration: {
+		color: colors.Action
+	},
+	segments: [
+		{
+			name: 'waitForLocalText',
+			id: randomId(),
+			text: 'Wait For Local Text',
+			type: BlockRenderer.Types.BlockSegment.Header,
+			notch: true,
+			divot: true,
+			inputs: [
+				{
+					internalName: 'output',
+					id: randomId(),
+					name: 'Output',
+					type: InputType.Variable,
+					mode: InputMode.Write
+				}
+			]
+		}
+	]
+}
+
 const sendWhatsapp: BlockRenderer.Types.BlockDefinition = {
 	name: 'sendWhatsapp',
 	isAsync: true,
@@ -689,6 +716,7 @@ const DefaultBlocks = [
 	sendEmail,
 	sendSms,
 	sendLocalText,
+	waitForLocalText,
 	sendWhatsapp,
 	prompt,
 	promptOn,
