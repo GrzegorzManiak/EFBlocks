@@ -7,6 +7,7 @@
     import VariableDrawer from './drawer.svelte';
     import PageSelector from './page.svelte';
     import Call from './call.svelte';
+    import MessageComponent from './message.svelte';
 
     import {VariableStore} from "../../../../blocks/executer/variable";
     import {Button} from "@/button";
@@ -466,6 +467,8 @@
         saving = false;
     }
 
+
+
     let projectName: string = $state("");
     let editorElement: HTMLDivElement;
     let layer: Konva.Layer;
@@ -531,6 +534,8 @@
     <div class="absolute top-0 right-0 z-10 ">
         <div class="flex flex-col gap-2 p-2 bg-white border rounded-md m-2">
             <Call />
+            <MessageComponent bind:projectId bind:running={agentRunning} />
+
             <div class="pb-2 border-b">
                 <h1 class="text-xl font-bold">Debug Tools</h1>
             </div>

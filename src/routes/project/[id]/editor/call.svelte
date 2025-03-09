@@ -3,7 +3,7 @@
     import RecordRTC from 'recordrtc';
 
     // Configuration
-    const SAMPLE_RATE = 48000;
+    const SAMPLE_RATE = 48000 * 0.7;
 
     // Component state
     let inputDevices = [];
@@ -160,22 +160,17 @@
                 type: 'audio',
                 mimeType: 'audio/wav',
                 recorderType: RecordRTC.StereoAudioRecorder,
-                timeSlice: 1000,
+                timeSlice: 500,
                 async ondataavailable(blob) {
                     console.log("RecordRTC data available, blob size:", blob.size);
                     try {
                         const buffer = await blob.arrayBuffer();
-                        console.log("Converted blob to ArrayBuffer, size:", buffer.byteLength);
-
-                        // Remove WAV header
                         const modifiedBuffer = buffer.slice(44);
-                        console.log("Modified buffer size after removing header:", modifiedBuffer.byteLength);
-
                         if (socket && socket.readyState === WebSocket.OPEN) {
-                            console.log("WebSocket is open, sending data...");
                             socket.send(modifiedBuffer);
-                            console.log("Data sent to server");
-                        } else {
+                        }
+
+                        else {
                             console.error("WebSocket not open, state:", socket ? socket.readyState : "socket is null");
                         }
                     } catch (err) {
