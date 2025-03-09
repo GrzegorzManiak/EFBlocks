@@ -762,6 +762,33 @@ const sendLocalVoiceMessage: BlockRenderer.Types.BlockDefinition = {
 	]
 }
 
+const autoplayLocalVoiceMessage: BlockRenderer.Types.BlockDefinition = {
+	name: 'autoplayLocalVoiceMessage',
+	isAsync: true,
+	configuration: {
+		color: colors.Action
+	},
+	segments: [
+		{
+			name: 'tts',
+			id: randomId(),
+			text: 'Autoplay Voice Message',
+			type: BlockRenderer.Types.BlockSegment.Header,
+			notch: true,
+			divot: true,
+			inputs: [
+				{
+					internalName: 'audioPath',
+					id: randomId(),
+					name: 'Audio Path',
+					type: InputType.Variable,
+					mode: InputMode.Read
+				}
+			]
+		}
+	]
+}
+
 const waitForVoice: BlockRenderer.Types.BlockDefinition = {
 	name: 'waitForVoice',
 	isAsync: true,
@@ -812,7 +839,8 @@ const DefaultBlocks = [
 	aiIfFunc,
 	textToSpeech,
 	sendWhatsappVoiceMessage,
-	sendLocalVoiceMessage
+	sendLocalVoiceMessage,
+	autoplayLocalVoiceMessage,
 ];
 
 export default DefaultBlocks;

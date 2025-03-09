@@ -2,6 +2,7 @@
     import { onMount, onDestroy } from 'svelte';
     import {Input} from "@/input";
     import { Button } from "@/button";
+    import CallSelector from './callSelector.svelte';
 
     // Define interfaces for the data structures
     interface Message {
@@ -344,18 +345,7 @@
 </script>
 
 <div class="flex flex-col h-full w-full max-w-md mx-auto overflow-hidden">
-    <div class="p-4 text-primary-foreground flex justify-between items-center border-b">
-        <h2 class="text-xl text-black font-bold">Messenger</h2>
-        <div class="flex items-center space-x-2">
-            <div class="flex items-center">
-                <span class="text-xs mr-1 text-muted-foreground">Status:</span>
-                <span class={`h-2 w-2 rounded-full ${running ? 'bg-green-500' : 'bg-red-500'}`}></span>
-            </div>
-            <div class="text-xs text-muted-foreground">
-                {projectStatus.totalResolved}/{projectStatus.totalPromises} tasks
-            </div>
-        </div>
-    </div>
+    <CallSelector bind:running />
 
     <div class="flex-1 overflow-y-auto p-4 space-y-4" bind:this={msgElement}>
         {#each messages as message (message.id)}

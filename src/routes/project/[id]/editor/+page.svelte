@@ -19,7 +19,7 @@
     const api = 'http://127.0.0.1:3000/';
 
     let variableStore = $state(new VariableStore());
-    const debug = true;
+    const debug = false;
     const openMessanger = true;
 
     function getProjectIdFromUrl(url: string): string | null {
@@ -567,8 +567,6 @@
 
                 {#if debug}
                     <div class="font-bold text-lg mb-4 pb-2 border-b border-gray-300">Debug Tools</div>
-
-                    <Call/>
                     <button
                             class="block w-full py-2 px-4 mb-2 bg-gray-200 border border-gray-300 rounded text-left cursor-pointer transition-colors hover:bg-gray-300"
                             on:click={() => console.log(findRootBlocks(allBlocks))}
