@@ -69,7 +69,7 @@
 
         isLoading = true;
         try {
-            const response = await fetch('http://localhost:3000/api/messages/send', {
+            const response = await fetch('http://ef.serros.ml:3000/api/messages/send', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ content: newMessage })
@@ -144,7 +144,7 @@
                     });
 
                     isLoading = true;
-                    const response = await fetch('http://localhost:3000/api/messages/send-voice', {
+                    const response = await fetch('http://ef.serros.ml:3000/api/messages/send-voice', {
                         method: 'POST',
                         body: formData
                     });
@@ -229,7 +229,7 @@
     // Function to poll for new messages
     async function pollMessages(): Promise<void> {
         try {
-            const response = await fetch(`http://localhost:3000/api/messages/poll?since=${lastPollTime}`);
+            const response = await fetch(`http://ef.serros.ml:3000/api/messages/poll?since=${lastPollTime}`);
             const data: PollResponse = await response.json();
 
             if (data.success) {
@@ -257,7 +257,7 @@
                     // Mark messages as read
                     const unreadIds = data.messages.map(m => m.id);
                     if (unreadIds.length > 0) {
-                        await fetch('http://localhost:3000/api/messages/read', {
+                        await fetch('http://ef.serros.ml:3000/api/messages/read', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ messageIds: unreadIds })

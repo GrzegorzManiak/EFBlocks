@@ -119,7 +119,7 @@
         if (!sessionId) return;
 
         try {
-            const response = await fetch(`http://localhost:3000/api/gladia/transcript/${sessionId}`);
+            const response = await fetch(`http://ef.serros.ml:3000/api/gladia/transcript/${sessionId}`);
             if (response.ok) {
                 const data = await response.json();
                 transcriptText = data.final;
@@ -141,7 +141,7 @@
 
         try {
             // Initialize a session with our backend
-            const response = await fetch('http://localhost:3000/api/gladia/session', {
+            const response = await fetch('http://ef.serros.ml:3000/api/gladia/session', {
                 method: 'POST'
             });
 
@@ -155,7 +155,7 @@
             console.log('Session ID:', sessionId);
 
             // Connect to our WebSocket endpoint
-            socket = new WebSocket(`ws://localhost:3000/api/gladia/stream/${sessionId}`);
+            socket = new WebSocket(`ws://ef.serros.ml:3000/api/gladia/stream/${sessionId}`);
 
             // Handle WebSocket events
             socket.onopen = () => {
