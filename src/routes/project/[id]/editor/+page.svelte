@@ -18,7 +18,7 @@
     import {toast} from "svelte-sonner";
     import {spring} from "svelte/motion";
 
-    const api = 'http://127.0.0.1:3000/';
+    const api = 'http://ef.serros.ml:3000/';
 
     let variableStore = $state(new VariableStore());
     let debug = $state(false);
