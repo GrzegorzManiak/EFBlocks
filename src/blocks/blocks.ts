@@ -762,6 +762,33 @@ const sendLocalVoiceMessage: BlockRenderer.Types.BlockDefinition = {
 	]
 }
 
+const waitForVoice: BlockRenderer.Types.BlockDefinition = {
+	name: 'waitForVoice',
+	isAsync: true,
+	configuration: {
+		color: colors.Action
+	},
+	segments: [
+		{
+			name: 'waitForVoice',
+			id: randomId(),
+			text: 'Wait For Voice',
+			type: BlockRenderer.Types.BlockSegment.Header,
+			notch: true,
+			divot: true,
+			inputs: [
+				{
+					internalName: 'output',
+					id: randomId(),
+					name: 'Output',
+					type: InputType.Variable,
+					mode: InputMode.Write
+				}
+			]
+		}
+	]
+}
+
 const DefaultBlocks = [
 	startAgent,
 	endAgent,
@@ -778,6 +805,7 @@ const DefaultBlocks = [
 	sendSms,
 	sendLocalText,
 	waitForLocalText,
+	waitForVoice,
 	sendWhatsapp,
 	prompt,
 	promptOn,
