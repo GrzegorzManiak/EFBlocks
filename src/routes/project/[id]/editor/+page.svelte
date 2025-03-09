@@ -3,6 +3,8 @@
     import * as Blocks from "../../../../blocks";
     import {IndicatorLine} from "../../../../blocks";
     import Konva from "konva";
+    import * as Dialog from "@/dialog";
+    import * as Card from "@/card";
 
     import VariableDrawer from './drawer.svelte';
     import PageSelector from './page.svelte';
@@ -19,7 +21,7 @@
     const api = 'http://127.0.0.1:3000/';
 
     let variableStore = $state(new VariableStore());
-    const debug = false;
+    let debug = $state(false);
     const openMessanger = true;
 
     function getProjectIdFromUrl(url: string): string | null {
@@ -478,6 +480,16 @@
         translateX.set(isOpen ? 0 : 100); // 0% = fully open, 100% = fully closed
     }
 
+    let showCode = $state(false);
+    let codeToDisplay: string = $state("");
+
+    function showCodeForPage(page: string) {
+        const code = pageCode.get(page);
+        if (!code) return console.warn("No code found for page", page);
+        codeToDisplay = code.join("\n");
+        showCode = true;
+    }
+
     let projectName: string = $state("");
     let editorElement: HTMLDivElement;
     let layer: Konva.Layer;
@@ -562,11 +574,23 @@
                     class="bg-gray-100 border-l border-gray-300 shadow-lg p-0 overflow-y-auto w-96 h-full"
             >
                 <MessageComponent
+                        bind:debug
                         bind:running={agentRunning}
                         bind:projectId/>
 
                 {#if debug}
                     <div class="font-bold text-lg mb-4 pb-2 border-b border-gray-300">Debug Tools</div>
+
+                    <Call/>
+
+<!--                    show code -->
+                    <button
+                            class="block w-full py-2 px-4 mb-2 bg-gray-200 border border-gray-300 rounded text-left cursor-pointer transition-colors hover:bg-gray-300"
+                            on:click={() => showCodeForPage(currentPage)}
+                    >
+                        Show Code
+                    </button>
+
                     <button
                             class="block w-full py-2 px-4 mb-2 bg-gray-200 border border-gray-300 rounded text-left cursor-pointer transition-colors hover:bg-gray-300"
                             on:click={() => console.log(findRootBlocks(allBlocks))}
@@ -665,6 +689,15 @@
         </div>
     </div>
 {/if}
+
+<Dialog.Root bind:open={showCode}  >
+    <Dialog.Content class="h-[90vh] overflow-auto p-4 max-w-[50vw]">
+        <pre class="text-sm  bg-gray-100 p-4 rounded-md">
+            {
+            codeToDisplay
+        }</pre>
+    </Dialog.Content>
+</Dialog.Root>
 
 <div class="flex h-screen">
     <div class="w-screen absolute top-0 left-0 z-20">

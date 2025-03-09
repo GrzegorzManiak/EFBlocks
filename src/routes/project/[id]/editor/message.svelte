@@ -39,10 +39,12 @@
     // Props
     let {
         projectId = $bindable(),
+        debug = $bindable(false),
         running = $bindable(false),
     }: {
         projectId: string;
         running: boolean;
+        debug: boolean;
     } = $props();
 
     // Component state
@@ -413,7 +415,7 @@
         {/each}
     </div>
 
-    <div class="border-t p-4 mb-[5rem]">
+    <div class="border-t p-4 mb-[3rem]">
         <form on:submit|preventDefault={sendMessage} class="flex space-x-2">
             <Input
                     type="text"
@@ -452,6 +454,11 @@
                     </svg>
                 {/if}
             </button>
+
+<!--            debug trigger -->
         </form>
+
+        <Button variant="ghost" class="mt-[1rem] w-full" on:click={() => debug = !debug}>Debug</Button>
+
     </div>
 </div>

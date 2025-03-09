@@ -324,14 +324,4 @@
         </button>
     </div>
 
-    {#if isCalling}
-        <Select
-            bind:value={selectedDeviceId}
-            disabled={isRecording || isConnecting || inputDevices.length === 0}
-        >
-            {#each inputDevices as device}
-                <option value={device.deviceId}>{device.label || 'Default'}</option>
-            {/each}
-        </Select>
-    {/if}
 </div>
