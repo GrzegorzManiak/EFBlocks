@@ -297,6 +297,46 @@ const logVariable: BlockRenderer.Types.BlockDefinition = {
 	]
 }
 
+const joinVariables: BlockRenderer.Types.BlockDefinition = {
+	name: 'joinVariables',
+	configuration: {
+		color: colors.Variable
+	},
+	segments: [
+		{
+			name: 'joinVariables',
+			id: randomId(),
+			text: 'Join Variables',
+			type: BlockRenderer.Types.BlockSegment.Header,
+			notch: true,
+			divot: true,
+			inputs: [
+				{
+					internalName: 'varA',
+					id: randomId(),
+					name: 'Variable A',
+					type: InputType.Variable,
+					mode: InputMode.Read
+				},
+				{
+					internalName: 'varB',
+					id: randomId(),
+					name: 'Variable B',
+					type: InputType.Variable,
+					mode: InputMode.Read
+				},
+				{
+					internalName: 'output',
+					id: randomId(),
+					name: 'Output',
+					type: InputType.Variable,
+					mode: InputMode.Write
+				}
+			]
+		}
+	]
+}
+
 const broadCast: BlockRenderer.Types.BlockDefinition = {
 	name: 'broadCast',
 	configuration: {
@@ -610,13 +650,6 @@ const aiIfFunc: BlockRenderer.Types.BlockDefinition = {
 					mode: InputMode.Read
 				},
 				{
-					internalName: 'eval',
-					id: randomId(),
-					name: 'Eval',
-					type: InputType.EvalOperator,
-					mode: InputMode.Read
-				},
-				{
 					internalName: 'varB',
 					id: randomId(),
 					name: 'Variable B',
@@ -709,6 +742,7 @@ const DefaultBlocks = [
 	onMessage,
 	setVariableTo,
 	logVariable,
+	joinVariables,
 	whileLoop,
 	foreverLoop,
 	ifElifBlock,
