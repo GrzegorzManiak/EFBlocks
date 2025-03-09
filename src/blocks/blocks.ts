@@ -735,6 +735,33 @@ const sendWhatsappVoiceMessage: BlockRenderer.Types.BlockDefinition = {
 	]
 }
 
+const sendLocalVoiceMessage: BlockRenderer.Types.BlockDefinition = {
+	name: 'sendLocalVoiceMessage',
+	isAsync: true,
+	configuration: {
+		color: colors.Action
+	},
+	segments: [
+		{
+			name: 'tts',
+			id: randomId(),
+			text: 'Send Local Voice Message',
+			type: BlockRenderer.Types.BlockSegment.Header,
+			notch: true,
+			divot: true,
+			inputs: [
+				{
+					internalName: 'audioPath',
+					id: randomId(),
+					name: 'Audio Path',
+					type: InputType.Variable,
+					mode: InputMode.Read
+				}
+			]
+		}
+	]
+}
+
 const DefaultBlocks = [
 	startAgent,
 	endAgent,
@@ -756,7 +783,8 @@ const DefaultBlocks = [
 	promptOn,
 	aiIfFunc,
 	textToSpeech,
-	sendWhatsappVoiceMessage
+	sendWhatsappVoiceMessage,
+	sendLocalVoiceMessage
 ];
 
 export default DefaultBlocks;

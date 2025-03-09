@@ -9,7 +9,9 @@
         content: string;
         sender: 'user' | 'system' | 'info';
         timestamp: number;
+        duration?: number;
         read: boolean;
+        isVoice?: boolean;
     }
 
     interface ProjectStatus {
@@ -67,6 +69,10 @@
                 newMessage = '';
                 await pollMessages(); // Poll immediately for updates
             }
+            // Scroll to the bottom of the messages
+            if (msgElement) {
+                msgElement.scrollTop = msgElement.scrollHeight;
+            }
         } catch (error) {
             console.error('Error sending message:', error);
         } finally {
@@ -99,6 +105,11 @@
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ messageIds: unreadIds })
                         });
+
+                        // Scroll to the bottom of the messages
+                        if (msgElement) {
+                            msgElement.scrollTop = msgElement.scrollHeight;
+                        }
                     }
                 }
 
@@ -123,35 +134,73 @@
     onDestroy(() => {
         // Clean up interval when component is destroyed
         if (pollingInterval) clearInterval(pollingInterval);
+        Object.values(audioElements).forEach(audio => {
+            audio.pause();
+            audio.src = '';
+        });
+        audioElements = {};
     });
 
     // Format timestamp to readable time
     function formatTime(timestamp: number): string {
         return new Date(timestamp).toLocaleTimeString();
     }
-    //
-    // $effect(() => {
-    //     if (running) {
-    //         messages.push({
-    //             id: '-1',
-    //             content: 'Agent is online',
-    //             timestamp: Date.now(),
-    //             read: false,
-    //             sender: 'info'
-    //         });
-    //
-    //     }
-    //
-    //     else {
-    //         messages.push({
-    //             id: '-2',
-    //             content: 'Agent is offline',
-    //             timestamp: Date.now(),
-    //             read: false,
-    //             sender: 'info'
-    //         });
-    //     }
-    // });
+    let msgElement: HTMLElement | null = $state(null);
+
+    function formatDuration(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = Math.floor(seconds % 60);
+        return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    }
+
+    // Handle audio playback
+    function toggleAudio(messageId) {
+        const message = messages.find(m => m.id === messageId);
+        if (!message || !message.isVoice) return;
+
+        // Create audio element if it doesn't exist
+        if (!audioElements[messageId]) {
+            const audio = new Audio(message.content);
+
+            audio.addEventListener('timeupdate', () => {
+                audioProgress[messageId] = (audio.currentTime / audio.duration) * 100;
+            });
+
+            audio.addEventListener('ended', () => {
+                playingAudio = null;
+                audioProgress[messageId] = 0;
+            });
+
+            audioElements[messageId] = audio;
+        }
+
+        // If this audio is already playing, pause it
+        if (playingAudio === messageId) {
+            audioElements[messageId].pause();
+            playingAudio = null;
+        } else {
+            // Stop any currently playing audio
+            if (playingAudio && audioElements[playingAudio]) {
+                audioElements[playingAudio].pause();
+                audioElements[playingAudio].currentTime = 0;
+                audioProgress[playingAudio] = 0;
+            }
+
+            // Play the new audio
+            audioElements[messageId].play();
+            playingAudio = messageId;
+        }
+    }
+</script>
+
+<script context="module" lang="ts">
+    // Define types for messages
+    type MessageId = string;
+
+    // Audio player state to manage across components
+    let audioElements: Record<MessageId, HTMLAudioElement> = {};
+    let playingAudio: MessageId | null = null;
+    let audioProgress: Record<MessageId, number> = {};
 </script>
 
 <div class="flex flex-col h-full w-full max-w-md mx-auto overflow-hidden">
@@ -168,7 +217,7 @@
         </div>
     </div>
 
-    <div class="flex-1 overflow-y-auto p-4 space-y-4">
+    <div class="flex-1 overflow-y-auto p-4 space-y-4" bind:this={msgElement}>
         {#each messages as message (message.id)}
             {#if message.sender === 'info'}
                 <div class="text-center text-muted-foreground py-8">
@@ -177,14 +226,53 @@
             {:else}
                 <div class={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                     <div class={`max-w-xs px-4 py-2 rounded-lg ${
-                        message.sender === 'user'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-200 text-gray-800'
-                    }`}>
-                        <p>{message.content}</p>
-                        <span class="text-xs opacity-70">
+                    message.sender === 'user'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-200 text-gray-800'
+                }`}>
+                        {#if message.isVoice}
+                            <div class="flex items-center space-x-2 w-[15rem]">
+                                <button
+                                        class="flex items-center justify-center w-8 h-8 rounded-full bg-opacity-20 hover:bg-opacity-30 transition-colors"
+                                        class:bg-white={message.sender === 'user'}
+                                        class:bg-gray-500={message.sender !== 'user'}
+                                        on:click={() => toggleAudio(message.id)}
+                                >
+                                    {#if playingAudio === message.id}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="6" y="4" width="4" height="16"></rect>
+                                            <rect x="14" y="4" width="4" height="16"></rect>
+                                        </svg>
+                                    {:else}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                        </svg>
+                                    {/if}
+                                </button>
+                                <div class="flex-1">
+                                    <div class="h-1 w-full rounded-full overflow-hidden"
+                                         class:bg-white={message.sender === 'user'}
+                                         class:bg-opacity-20={message.sender === 'user'}
+                                         class:bg-gray-300={message.sender !== 'user'}
+                                    >
+                                        <div
+                                                class="h-full rounded-full"
+                                                class:bg-white={message.sender === 'user'}
+                                                class:bg-gray-500={message.sender !== 'user'}
+                                                style="width: {audioProgress[message.id] || 0}%"
+                                        ></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="text-xs opacity-70 mt-1 block">
+                            {formatTime(message.timestamp)} · {formatDuration(message.duration || 0)}
+                        </span>
+                        {:else}
+                            <p>{message.content}</p>
+                            <span class="text-xs opacity-70">
                             {formatTime(message.timestamp)}
                         </span>
+                        {/if}
                     </div>
                 </div>
             {/if}
