@@ -6,6 +6,7 @@
 
     import VariableDrawer from './drawer.svelte';
     import PageSelector from './page.svelte';
+    import Call from './call.svelte';
 
     import {VariableStore} from "../../../../blocks/executer/variable";
     import {Button} from "@/button";
@@ -16,7 +17,7 @@
     const api = 'http://127.0.0.1:3000/';
 
     let variableStore = $state(new VariableStore());
-    const debug = false;
+    const debug = true;
 
     function getProjectIdFromUrl(url: string): string | null {
         const match = url.match(/\/project\/([^\/]+)\/editor/);
@@ -529,6 +530,7 @@
 {#if debug}
     <div class="absolute top-0 right-0 z-10 ">
         <div class="flex flex-col gap-2 p-2 bg-white border rounded-md m-2">
+            <Call />
             <div class="pb-2 border-b">
                 <h1 class="text-xl font-bold">Debug Tools</h1>
             </div>
