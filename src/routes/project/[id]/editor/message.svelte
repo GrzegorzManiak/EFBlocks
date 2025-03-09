@@ -1,7 +1,7 @@
-<!-- MessageComponent.svelte -->
 <script lang="ts">
     import { onMount, onDestroy } from 'svelte';
     import {Input} from "@/input";
+    import { Button } from "@/button";
 
     // Define interfaces for the data structures
     interface Message {
@@ -52,6 +52,14 @@
     let isLoading: boolean = $state(false);
     let projectStatus: ProjectStatus = $state({ isRunning: false, totalPromises: 0, totalResolved: 0 })
 
+    // Voice recording state
+    let mediaRecorder: MediaRecorder | null = $state(null);
+    let isRecording: boolean = $state(false);
+    let recordedChunks: BlobPart[] = [];
+    let recordingStartTime: number = 0;
+    let recordingDuration: number = $state(0);
+    let recordingTimer: ReturnType<typeof setInterval> | null = null;
+
     // Function to send a message
     async function sendMessage(): Promise<void> {
         if (!newMessage.trim()) return;
@@ -77,6 +85,127 @@
             console.error('Error sending message:', error);
         } finally {
             isLoading = false;
+        }
+    }
+
+    // Function to start voice recording
+    async function startRecording() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+
+            recordedChunks = [];
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) {
+                    recordedChunks.push(e.data);
+                }
+            };
+
+            mediaRecorder.start();
+            isRecording = true;
+            recordingStartTime = Date.now();
+
+            // Start a timer to update recording duration
+            recordingTimer = setInterval(() => {
+                recordingDuration = (Date.now() - recordingStartTime) / 1000;
+            }, 100);
+
+        } catch (error) {
+            console.error('Error starting recording:', error);
+        }
+    }
+
+    // Function to stop voice recording and send
+    async function stopRecording() {
+        if (!mediaRecorder) return;
+
+        return new Promise<void>((resolve) => {
+            mediaRecorder.onstop = async () => {
+                try {
+                    const audioBlob = new Blob(recordedChunks, { type: 'audio/webm' });
+                    const duration = (Date.now() - recordingStartTime) / 1000;
+
+                    // Create FormData to send the audio file
+                    const formData = new FormData();
+                    formData.append('audio', audioBlob, 'recording.webm');
+                    formData.append('duration', duration.toString());
+
+                    messages.push({
+                        id: `temp-${Date.now()}`,
+                        content: URL.createObjectURL(audioBlob),
+                        sender: 'user',
+                        timestamp: Date.now(),
+                        duration,
+                        read: true,
+                        isVoice: true
+                    });
+
+                    isLoading = true;
+                    const response = await fetch('http://localhost:3000/api/messages/send-voice', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        await pollMessages();
+                    }
+
+                    // Clean up recording state
+                    if (mediaRecorder && mediaRecorder.stream) {
+                        mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                    }
+
+                    // Scroll to the bottom of the messages
+                    if (msgElement) {
+                        msgElement.scrollTop = msgElement.scrollHeight;
+                    }
+
+                } catch (error) {
+                    console.error('Error sending voice message:', error);
+                } finally {
+                    isLoading = false;
+                    resolve();
+                }
+            };
+
+            mediaRecorder.stop();
+            isRecording = false;
+
+            // Clear the recording duration timer
+            if (recordingTimer) {
+                clearInterval(recordingTimer);
+                recordingTimer = null;
+            }
+
+            // Reset the recording duration
+            recordingDuration = 0;
+        });
+    }
+
+    // Handle voice button press and release
+    function handleVoiceButtonDown() {
+        if (!running) return;
+        startRecording();
+    }
+
+    function handleVoiceButtonUp() {
+        if (isRecording) {
+            stopRecording();
+        }
+    }
+
+    // Handle voice button touch events for mobile
+    function handleVoiceButtonTouchStart(e) {
+        e.preventDefault(); // Prevent default touch behavior
+        if (!running) return;
+        startRecording();
+    }
+
+    function handleVoiceButtonTouchEnd(e) {
+        e.preventDefault();
+        if (isRecording) {
+            stopRecording();
         }
     }
 
@@ -134,6 +263,17 @@
     onDestroy(() => {
         // Clean up interval when component is destroyed
         if (pollingInterval) clearInterval(pollingInterval);
+        if (recordingTimer) clearInterval(recordingTimer);
+
+        // Stop any ongoing recording
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+            mediaRecorder.stop();
+            if (mediaRecorder.stream) {
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+            }
+        }
+
+        // Clean up audio elements
         Object.values(audioElements).forEach(audio => {
             audio.pause();
             audio.src = '';
@@ -290,14 +430,37 @@
                     bind:value={newMessage}
                     placeholder="Type your message..."
                     class="flex-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                    disabled={!running}
+                    disabled={!running || isRecording}
             />
             <button
                     type="submit"
                     class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
-                    disabled={!newMessage.trim() || !running}
+                    disabled={!newMessage.trim() || !running || isRecording}
             >
                 {isLoading ? 'Sending...' : 'Send'}
+            </button>
+
+            <!-- Voice recording button -->
+            <button
+                    type="button"
+                    class={`px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary flex items-center justify-center ${isRecording ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                    disabled={!running || isLoading}
+                    on:mousedown={handleVoiceButtonDown}
+                    on:mouseup={handleVoiceButtonUp}
+            >
+                {#if isRecording}
+                    <div class="flex items-center">
+                        <span class="animate-pulse mr-1">●</span>
+                        <span>{formatDuration(recordingDuration)}</span>
+                    </div>
+                {:else}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                        <line x1="12" y1="19" x2="12" y2="23"></line>
+                        <line x1="8" y1="23" x2="16" y2="23"></line>
+                    </svg>
+                {/if}
             </button>
         </form>
     </div>
